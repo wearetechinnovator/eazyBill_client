@@ -1,0 +1,48 @@
+.sb_tag_picker {
+  @apply relative w-full;
+}
+
+.sb_tag__main {
+  @apply w-full border rounded px-1 py-0.5 flex flex-wrap items-center gap-1 bg-white;
+}
+
+.sb_tag__item {
+  @apply bg-blue-100 text-blue-700 rounded p-1 flex items-center gap-1 shrink-0;
+}
+
+.sb_tag__item svg {
+  @apply cursor-pointer hover:text-red-600;
+}
+
+.sb_tag__input {
+  @apply flex-1 min-w-[150px] p-1 outline-none border-none bg-transparent;
+}
+
+.sb_tag__dropdown {
+  @apply absolute text-left top-full left-0 right-0 mt-1 bg-white border;
+  @apply rounded-md shadow-lg z-[9999999] max-h-40 overflow-auto;
+}
+
+.sb_tag__option {
+  @apply px-3 py-2 cursor-pointer;
+}
+
+.sb_tag__option:hover {
+  @apply bg-gray-100;
+}
+
+.sb_tag__option {
+  @apply px-3 py-2 cursor-pointer flex items-center gap-2;
+}
+
+.sb_tag__option:hover {
+  @apply bg-gray-100;
+}
+
+.sb_tag__option--selected {
+  @apply bg-blue-50;
+}
+
+.sb_tag__checkbox {
+  @apply w-4 h-4 accent-blue-600 cursor-pointer shrink-0;
+}

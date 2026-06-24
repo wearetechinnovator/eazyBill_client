@@ -1,0 +1,1562 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  font-family: "Nunito Sans", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+::selection {
+  background-color: #003628;
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  cursor: s-resize;
+}
+
+::-webkit-scrollbar-track {
+  /* border-radius: 30px; */
+  background-color: #EDF2F1;
+}
+
+::-webkit-scrollbar-thumb {
+  /* background-color: rgb(61, 61, 61); */
+  background-color: #003628;
+  border-radius: 30px;
+}
+
+
+.loader {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: conic-gradient(rgba(59, 130, 246, 0) 0deg,
+      rgba(59, 130, 246, 0.1) 40deg,
+      rgba(59, 130, 246, 0.3) 80deg,
+      rgba(59, 130, 246, 0.6) 160deg,
+      rgba(59, 130, 246, 1) 300deg);
+  animation: spin 0.9s linear infinite;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), black 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), black 0);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+#main {
+  min-width: 100%;
+  height: calc(100vh - 50px);
+  display: flex;
+  justify-content: space-between;
+}
+
+.content__body {
+  width: 100%;
+  background: linear-gradient(90deg, rgba(230, 236, 223, 1) 56%, rgba(237, 244, 251, 1) 86%);
+  padding: 10px;
+  padding-bottom: 0px;
+  overflow-y: auto;
+}
+
+.content__body__main {
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 5px lightgrey;
+  font-size: 13px !important;
+  background-color: white;
+  @apply border border-slate-300;
+  margin-bottom: 10px;
+}
+
+/* .content__body__main:hover{
+  box-shadow: 0px 0px 5px lightgrey;
+  border: none;
+} */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 0% !important;
+}
+
+.nav__logo {
+  /* box-shadow: 4px 3px #888888; */
+}
+
+.menu-link {
+  @apply hover:no-underline focus-within:no-underline rounded;
+  @apply text-[15px] flex items-center gap-2 py-2 text-gray-600 p-4;
+  color: #003628 !important;
+  border-right: 4px solid #ffffff;
+  transition: .3s;
+  overflow: hidden;
+}
+
+.menu-link:hover {
+  background-color: rgb(247, 247, 247) !important;
+  color: #003628 !important;
+  border-right: 4px solid #003628;
+  transform: translateX(-10px);
+}
+
+.chart-btn-see {
+  color: #003e32;
+  font-weight: 500;
+  border: 1px solid #003e32;
+  border-radius: 3px;
+  padding: 3px 15px;
+  transition: .3s;
+}
+
+.chart-btn-see:hover {
+  color: #ffffff;
+  background: #003628;
+}
+
+/* Sidenav */
+.logo__area {
+  transition: 0.3s all;
+}
+
+.side__nav {
+  transition: 0.3s all;
+  overflow-y: auto;
+}
+
+.side__nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.side__nav::-webkit-scrollbar-thumb {
+  /* background-color: #fff; */
+  background-color: rgb(23, 80, 23);
+  border-radius: 0px;
+}
+
+.side__nav::-webkit-scrollbar-track {
+  background-color: #003E32;
+}
+
+.side__nav::-webkit-scrollbar-thumb:hover {
+  background-color: #44e28e;
+}
+
+.side__nav__links a {
+  color: white;
+  text-decoration: none;
+
+}
+
+.side__nav__links a:hover,
+.side__nav__links:focus {
+  text-decoration: none;
+  /* color: white; */
+  color: #003628;
+  font-weight: 600;
+}
+
+.side__nav .active__link {
+  background-color: white;
+  color: #003628;
+  font-weight: 600;
+}
+
+.side__nav .active__link svg {
+  color: #003628;
+}
+
+.side__nav__links li {
+  padding: 8px;
+  font-size: 11px;
+  padding-left: 15px;
+  transition: 0.5s all;
+  border-radius: 0px;
+}
+
+.side__nav__links li:hover {
+  background-color: white;
+  color: #003628;
+}
+
+.side__nav__links li:hover svg {
+  color: #003628;
+}
+
+.side__nav__links li svg {
+  /* color: rgb(167, 167, 247); */
+  color: white;
+  font-size: 14px;
+}
+
+.side__nav__link__group h3 {
+  margin-left: 10px;
+  font-size: 12px;
+  color: rgb(218, 208, 208)
+}
+
+
+/* Breacrumb */
+.rs-breadcrumb-item a {
+  color: blueviolet;
+  font-size: 14px;
+}
+
+.rs-breadcrumb-item a:hover,
+.rs-breadcrumb-item a:focus-within {
+  text-decoration: none;
+}
+
+.add__table {
+  @apply w-full bg-white rounded my-6 border border-gray-200;
+}
+
+.add__table thead tr th,
+.add__table thead tr td {
+  @apply text-sm;
+  padding: 10px;
+}
+
+input,
+textarea {
+  @apply w-full p-1 border border-gray-200 outline-none hover:border-[#003E32];
+  @apply focus:border-[#003E32];
+  line-height: 16px !important;
+  border-radius: 3px;
+}
+
+/* input[type="checkbox"] {
+  width: 20px !important;
+} */
+
+select {
+  @apply w-full p-[3px] border border-gray-200 rounded outline-none;
+}
+
+
+.table-style {
+  text-align: center;
+  border: 1px solid #E5E7EB;
+}
+
+.table-style td,
+.table-style th {
+  border-right: 1px solid #E5E7EB;
+  padding: 4px 5px;
+  font-size: 12px !important;
+  line-height: 5px;
+}
+
+.table-style thead tr th {
+  padding: 5px 0;
+  line-height: normal;
+}
+
+#taxAmountTable .table-style td,
+#addtionalChargeTable .table-style td {
+  padding-top: 8px !important;
+}
+
+.add__table thead {
+  background-color: #F6F7FB;
+}
+
+.list__icons {
+  @apply flex gap-2;
+  margin-top: 19px;
+}
+
+.list__icon {
+  @apply bg-blue-700 rounded-full w-[30px] h-[30px] flex justify-center items-center cursor-pointer;
+  @apply hover:bg-blue-800;
+}
+
+.list_buttons {
+  @apply w-full lg:w-[40%] flex gap-2 items-center justify-around text-nowrap mt-4;
+}
+
+.list_buttons select {
+  width: 90px;
+  height: 35px;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+}
+
+.list_buttons button {
+  /* box-shadow: 1px 3px rgb(80, 80, 253); */
+  width: 80px;
+  padding: 5px;
+  color: white;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.add-table-discount-input {
+  position: relative;
+}
+
+.add-table-discount-input input {
+  padding-left: 33px;
+}
+
+.add-table-discount-input div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: rgba(211, 211, 211, 0.336);
+  padding: 10px;
+  height: 100%;
+  border-start-start-radius: 2px;
+  border-end-start-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#Settings .forms p {
+  margin-bottom: 5px;
+}
+
+
+.file__uploader__div {
+  @apply w-full border rounded hover:border-blue-500;
+  @apply flex justify-between items-center gap-1 p-1;
+
+}
+
+.file__upload {
+  @apply bg-blue-600 text-[18px];
+}
+
+.remove__upload {
+  @apply bg-red-500;
+  font-size: 12px !important;
+}
+
+.file__upload,
+.remove__upload {
+  @apply text-white w-[25px] h-[25px] rounded-full p-1 cursor-pointer;
+  display: grid;
+  place-items: center;
+}
+
+.form-btn-bar {
+  @apply w-full px-2 py-2 rounded-t mt-1 bg-white sticky bottom-0 left-0 right-0 border-t flex items-center justify-start gap-2 text-sm;
+  box-shadow: 0px -2px 5px rgb(0 0 0 / 0.1);
+}
+
+.add-bill-btn {
+  @apply bg-green-500 hover:bg-green-400 text-white rounded min-w-[75px] px-2;
+  @apply flex items-center justify-center gap-1 py-2 text-xs;
+}
+
+.reset-bill-btn {
+  @apply bg-blue-800 hover:bg-blue-700 text-white;
+  @apply rounded w-[70px] flex items-center justify-center gap-1 py-2 text-xs;
+}
+
+#invoice tr td:not(.invoice__header tr td) {
+  border: 1px solid #c5c5c5;
+  padding: 3px;
+  color: black;
+  font-size: 10px;
+  page-break-inside: avoid;
+  line-height: 10px;
+}
+
+.item__table__body .item__row td {
+  border: none !important;
+  background-color: rgba(245, 245, 245, 0.438);
+  border-top: 1px solid rgb(236, 235, 235) !important;
+}
+
+#invoice thead td {
+  font-weight: 500;
+}
+
+.cancel__invoice {
+  position: absolute;
+  color: rgba(255, 0, 0, 0.295);
+  text-transform: uppercase;
+  font-size: 6.5rem;
+  transform: rotate(-50deg);
+  top: 292px;
+  left: 110px;
+}
+
+#dashboard table th {
+  color: #003628 !important;
+}
+
+.profile-switch-button {
+  padding: 5px 10px;
+  color: black;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid rgb(0 62 50 / var(--tw-bg-opacity, 1));
+  font-weight: 500;
+}
+
+.profile-switch-button-active {
+  background-color: rgb(0 62 50 / var(--tw-bg-opacity, 1));
+  color: white;
+  font-weight: normal;
+  border: none;
+}
+
+.top__btn__grp {
+  @apply flex justify-between w-full mb-4;
+}
+
+.add__btns,
+.extra__btns {
+  @apply flex items-center gap-2 w-full;
+}
+
+.add__btns button {
+  @apply text-[13px] bg-blue-500 text-white px-2 py-[3px] flex items-center gap-1 rounded-[5px];
+}
+
+.extra__btns button {
+  @apply text-[13px] bg-blue-500 text-white px-2 py-[3px] flex items-center gap-1 rounded-[5px];
+}
+
+.extra__btns button:last-child {
+  @apply bg-green-400;
+}
+
+.shimmer__parent {
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 13px !important;
+  background-color: rgb(247, 247, 247);
+  box-shadow: 0px 0px 5px rgb(196, 196, 196);
+}
+
+.shimmer__parent .animate {
+  background: linear-gradient(90deg, #e0e0e0 25%, #f7f3f3 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.mail__modal .mail__body p {
+  margin-bottom: 5px !important;
+}
+
+
+.record__download {
+  @apply text-xl w-[25px] h-[25px] bg-gray-100 border rounded-full grid place-items-center cursor-pointer;
+  @apply text-gray-600
+}
+
+.download__menu {
+  padding: 5px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.download__menu:hover {
+  background-color: #F3F4F6;
+  border-radius: 8px;
+}
+
+.raport__table tr:nth-child(even) {
+  background-color: lightgray;
+}
+
+.add_new_compnent {
+  @apply mb-2 w-full bg-white rounded p-2 shadow-sm overflow-hidden transition-all;
+  @apply border border-slate-300;
+}
+
+.add_new_compnent button {
+  @apply px-2 py-1 rounded flex items-center gap-1 text-[13px];
+}
+
+.admin__area span {
+  display: flex;
+  align-items: center;
+}
+
+.select__add__button {
+  @apply w-full bg-[#003E32] rounded text-white flex items-center gap-1 justify-center;
+  padding: 7px;
+}
+
+.select__add__button:hover svg {
+  transition: 0.3s all linear;
+  margin-left: 5px;
+}
+
+#filterBill div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+}
+
+#filterBtnGrp button {
+  @apply rounded px-2 py-1 bg-green-500 text-white;
+}
+
+#filterBtnGrp button:last-child {
+  @apply bg-blue-500;
+}
+
+#filterBtnGrp button svg {
+  font-size: 14px;
+}
+
+.listing__btn_grp {
+  @apply flex items-center gap-3;
+}
+
+
+.listing__btn_grp button:last-child:active {
+  @apply scale-95;
+}
+
+
+.bill__and__sping__adr {
+  @apply w-full p-2 flex;
+}
+
+
+.required__text {
+  @apply text-red-600
+}
+
+
+.delete__icon {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  padding: 3px;
+  color: white;
+  font-size: 18px;
+  @apply bg-red-500 hover:bg-red-400;
+}
+
+
+.paginate__parent {
+  @apply flex justify-between items-center mt-2;
+}
+
+.paginate__button__back {
+  @apply border border-blue-700 w-[20px] h-[20px] grid place-items-center cursor-pointer
+}
+
+.paginate__button__number {
+  @apply w-[20px] h-[20px] text-center cursor-pointer
+}
+
+.paginate__button__number:first-child {
+  border: 1px solid rgb(65, 65, 238);
+}
+
+.paginate__button__number {
+  border: 1px solid rgb(66, 66, 241);
+  border-left: none;
+}
+
+.active__page {
+  @apply bg-blue-700 text-white;
+}
+
+.paginate__button__next {
+  @apply border border-blue-700 border-l-0 w-[20px] h-[20px] flex items-center justify-center cursor-pointer;
+}
+
+
+.list__table {
+  border-radius: 5px;
+  padding-bottom: 3px;
+}
+
+.list__table tbody {
+  border: 1px solid #b4d7d0;
+}
+
+.list__table__head {
+  background-color: #003E32;
+  color: white;
+  font-weight: bold;
+  border: 1px solid #003E32;
+}
+
+.list__table tbody tr:hover {
+  background-color: #e4f8f49e;
+}
+
+.list__table tbody tr {
+  border: 1px solid #efefef !important;
+}
+
+.list__table tbody tr td {
+  border: 1px solid #efefef !important;
+  @apply px-2;
+}
+
+.list__table thead tr th {
+  @apply px-2
+}
+
+.list__table__head tr th:first-child {
+  @apply w-[50px]
+}
+
+.list__table__head.without__checkbox tr th:first-child {
+  @apply w-[130px];
+}
+
+.list__table__edit__icon {
+  @apply bg-blue-600 text-white p-[4px] w-full rounded flex justify-center items-center text-[14px];
+
+}
+
+.table__list__action {
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  margin: 0px auto;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #6d6c6c;
+}
+
+.table__list__action:active {
+  background-color: rgb(238, 235, 235);
+  border: 1px solid rgb(216, 215, 215)
+}
+
+.table__list__action:hover {
+  color: black;
+}
+
+.table__list__action__parent {
+  width: 120px;
+}
+
+.table__list__action__icon {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.table__list__action__icon:hover {
+  background-color: rgb(245, 244, 244);
+}
+
+
+.customer_badge {
+  background: rgb(42, 116, 42);
+  border-radius: 30px;
+  padding: 0px 6px 2px;
+  color: white;
+  font-size: 12px;
+  line-height: 0 !important;
+}
+
+
+/* checkbox  */
+/* :::::::::::::::::::: */
+
+table input[type="checkbox"] {
+  @apply appearance-none h-[15px] w-[15px] rounded border border-gray-300 checked:bg-blue-600 checked:border-blue-600;
+  position: relative;
+  left: 0;
+  top: 0px;
+}
+
+input[type="checkbox"] {
+  @apply appearance-none h-[15px] w-[15px] rounded border border-gray-300 checked:bg-blue-600 checked:border-blue-600;
+  position: relative;
+  left: 0;
+}
+
+input[type="checkbox"]:hover {
+  border: 1px solid rgb(194, 191, 191);
+
+}
+
+input[type="checkbox"]:checked {
+  color: white;
+}
+
+input[type="checkbox"]::before {
+  position: absolute;
+  content: "✔";
+  font-size: 12px;
+  opacity: 0;
+  left: 1px;
+}
+
+input[type="checkbox"]:checked::before {
+  opacity: 1;
+}
+
+.party__data.active {
+  @apply border-blue-300 bg-blue-50;
+}
+
+.party__data.active h6 {
+  @apply text-blue-400;
+}
+
+.party__data.active h6 svg {
+  @apply text-blue-400;
+}
+
+.party__data {
+  @apply border w-full px-[9px] py-[4px] rounded-md bg-white cursor-pointer;
+}
+
+.party__data h6 {
+  font-weight: 500;
+  line-height: 20px !important;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: gray;
+  font-size: 13px !important;
+}
+
+.party__data h6 svg {
+  font-size: 18px;
+  color: gray;
+}
+
+.party__data p {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 17px;
+}
+
+.custom-disabled:disabled {
+  cursor: auto;
+}
+
+.custom-disabled:disabled:hover {
+  cursor: auto;
+  border: 1px solid rgb(229, 231, 23539);
+}
+
+.advance__filter {
+  @apply w-[200px]
+}
+
+.advance__filter p {
+  padding: 5px 10px;
+  margin-top: 0px !important;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.advance__filter p:hover {
+  background-color: rgb(245, 244, 244);
+}
+
+.advance__filter__btn {
+  background-color: #003628;
+  border-radius: 5px;
+  color: white;
+}
+
+.advance__filter__more {
+  text-align: center;
+  color: rgb(12, 12, 114);
+  width: 100%;
+  cursor: pointer;
+  padding: 5px 0px;
+}
+
+.create__drpdwn {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.create__drpdwn a {
+  color: #003628;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.create__drpdwn a:hover {
+  color: #003628 !important;
+  background-color: rgb(247, 247, 247);
+  border-right: 4px solid #003628;
+}
+
+.swal-modal {
+  width: 350px;
+}
+
+.swal-title {
+  font-size: 20px;
+  padding: 0px !important;
+}
+
+.swal-icon {
+  width: 60px;
+  height: 60px;
+}
+
+.swal-icon--warning__body {
+  height: 30px;
+}
+
+
+.details__header {
+  @apply flex justify-between items-center;
+}
+
+.details__header p {
+  @apply font-bold flex items-center gap-1;
+}
+
+.pencil {
+  width: 25px;
+  height: 25px;
+  color: #003E32;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 100%;
+}
+
+.pencil:hover {
+  background-color: #F6F7FB;
+  border: 1px solid #e9e9ec;
+}
+
+.pencil:active {
+  border: none;
+}
+
+.save__and__reset__btns {
+  @apply text-[13px] text-white rounded w-[70px] flex items-center justify-center gap-1 py-[5px];
+}
+
+
+/* Add this to your CSS file */
+.table__responsive {
+  overflow-x: auto;
+}
+
+.table__responsive table {
+  min-width: 600px;
+  /* Adjust as needed */
+  border-collapse: collapse;
+}
+
+/* .party__details__header {
+  @apply flex items-center gap-4 border-b border-gray-200;
+}
+
+.party__details__header button {
+  @apply text-[13px] w-[70px] flex items-center justify-center gap-1 py-[5px];
+}
+
+.party__details__header .active {
+  border-bottom-width: 2px;
+  --tw-border-opacity: 1;
+  border-color: rgb(0 62 50);
+  font-weight: 600;
+  --tw-text-opacity: 1;
+  color: rgb(0 62 50);
+} */
+
+.party__details__header {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  background: rgb(243, 243, 243);
+  padding: 8px 8px 0;
+  border-radius: 10px;
+  /* border-end-start-radius: 0;
+  border-end-end-radius: 0; */
+}
+
+.party__details__header button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #666;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  margin-right: 1px;
+  min-width: 80px;
+  transition: background 0.1s, color 0.1s;
+  z-index: 0;
+}
+
+.party__details__header button:hover:not(.active) {
+  background: #d5d5d5;
+  color: #333;
+}
+
+.party__details__header .active {
+  background: #fff;
+  color: rgb(0 62 50);
+  font-weight: 500;
+  z-index: 2;
+  box-shadow: -1px 0 0 #ccc, 1px 0 0 #ccc;
+}
+
+
+
+
+.item__details__table {
+  @apply overflow-x-auto mt-3 rounded;
+
+}
+
+.item__details__table table {
+  @apply w-full border rounded;
+}
+
+.item__details__table table thead {
+  @apply bg-gray-200
+}
+
+.item__details__table table thead td {
+  @apply font-semibold
+}
+
+.item__details__table table tbody {
+  @apply text-xs;
+}
+
+.item__details__table table tr td {
+  @apply p-[8px] border border-gray-100;
+}
+
+.item__details__table table tr:nth-child(even) {
+  @apply bg-gray-50
+}
+
+.badge {
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 11px;
+  color: white;
+}
+
+/* px-2 text-white rounded-lg text-[11px] font-bold */
+.red-badge {
+  @apply bg-red-100 text-red-400;
+}
+
+.green-badge {
+  @apply bg-green-100 text-green-600;
+}
+
+.yellow-badge {
+  @apply bg-yellow-50 text-yellow-600;
+}
+
+.item__table {
+  table-layout: fixed;
+}
+
+/* .table__wrapper {
+  min-height: 500px;
+} */
+
+/* .table__wrapper table.item__table {
+  height: 100%;
+} */
+.table__wrapper table {
+  page-break-inside: avoid;
+}
+
+.item__table tr td {
+  word-wrap: break-word;
+}
+
+.table__wrapper table.item__table tfoot {
+  margin-top: auto;
+}
+
+.without__border {
+  border: none !important;
+  border-left: 1px solid #c5c5c5 !important;
+  border-right: 1px solid #c5c5c5 !important;
+}
+
+.discount-font {
+  font-size: 8px;
+}
+
+.rounded__circle {
+  @apply w-[25px] h-[25px] bg-gray-100 rounded-full grid place-items-center border cursor-pointer;
+  @apply hover:bg-gray-200;
+}
+
+.tab {
+  @apply bg-gray-400 flex items-center rounded overflow-hidden;
+}
+
+.tab__btn {
+  @apply bg-gray-50 px-3 py-1 border border-r;
+  @apply hover:bg-gray-100;
+}
+
+.active__tab__btn {
+  @apply bg-gray-200;
+  @apply hover:bg-gray-100;
+}
+
+.user__details__tab {
+  @apply w-full flex flex-col lg:flex-row gap-2
+}
+
+.user__details__tab p {
+  @apply text-gray-500;
+}
+
+@media print {
+  table {
+    margin: 0;
+    padding: 0;
+    border-collapse: collapse !important;
+    border-spacing: none !important;
+    /* space between cells */
+  }
+
+  th,
+  td {
+    padding: 5px !important;
+    /* space inside cells */
+    border: 1px solid #c5c5c5 !important;
+  }
+
+  table.item__table td {
+    max-width: 80mm;
+    word-wrap: break-word;
+  }
+
+  .without__border {
+    border: none !important;
+    border-left: 1px solid #c5c5c5 !important;
+    border-right: 1px solid #c5c5c5 !important;
+  }
+
+  .second-page-fixed {
+    page-break-before: always;
+    /* move to 2nd page */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  #mainBill {
+    position: relative;
+  }
+
+  #invoiceBill td {
+    border: 1px solid #c5c5c5;
+    padding: 2px;
+    color: black;
+    font-size: 10px;
+    page-break-inside: avoid;
+    line-height: 9px;
+  }
+}
+
+input {
+  transition: .5s;
+}
+
+.pagination-custom {
+  padding: 6px 6px;
+  background: #d6fff7;
+  border-radius: 30px;
+
+}
+
+.pagination-custom .paginate__button__number {
+  border: 1px solid #003e32;
+  border-radius: 30px;
+  height: 23px;
+  width: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pagination-custom .paginate__button__number.active__page {
+  background: #003e32;
+}
+
+.pagination-custom .paginate__button__next {
+  border: 1px solid #003e32;
+  border-radius: 30px;
+  height: 23px;
+  width: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.pagination-custom .paginate__button__back {
+  border: 1px solid #003e32;
+  border-radius: 30px;
+  height: 23px;
+  width: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.attendance__chip__btn {
+  @apply bg-gray-100 border border-gray-300 rounded-full w-[25px] h-[25px] text-xs;
+  @apply text-center grid place-items-center text-gray-500 cursor-pointer;
+}
+
+.attendance__more__icon {
+  @apply text-[16px] cursor-pointer
+}
+
+.attendance__chip__btn.yellow {
+  @apply border-yellow-400 text-yellow-500 bg-yellow-50
+}
+
+.attendance__chip__btn.blue {
+  @apply border-blue-400 text-blue-500 bg-blue-50
+}
+
+.attendance__chip__btn.red {
+  @apply border-red-400 text-red-500 bg-red-50
+}
+
+.attendance__chip__btn.green {
+  @apply border-green-400 text-green-500 bg-green-50
+}
+
+.attendance__active__present {
+  @apply bg-green-100 border-green-700
+}
+
+.attendance__active__absent {
+  @apply bg-red-100 border-red-400
+}
+
+.attendace__setting__time__drp {
+  @apply w-[26%];
+}
+
+.dashboard-main-box h1,
+.dashboard-main-box h2,
+.dashboard-main-box h3,
+.dashboard-main-box h4,
+.dashboard-main-box h5,
+.dashboard-main-box h6 {
+  line-height: normal !important;
+}
+
+.dashboard-main-box {
+  border: 1px solid #ffffff;
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 15px 15px 15px;
+  background: #ffffff2b;
+}
+
+.glow-shape {
+  position: relative;
+  z-index: 2;
+}
+
+.glow-shape::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  width: 40%;
+  height: 82%;
+  animation: glow 20s linear infinite;
+  filter: blur(65px);
+  background-color: #B7D7D3;
+  box-shadow: 0 0 20px #B7D7D3;
+  z-index: -1;
+  border-radius: 100%;
+}
+
+.glow-shape::before {
+  content: '';
+  position: absolute;
+  top: 69%;
+  right: 3%;
+  width: 37%;
+  /* height: 69%; */
+  animation: glow 20s linear infinite;
+  filter: blur(65px);
+  background-color: #d9d7e9;
+  box-shadow: 0 0 20px #C2BDDF;
+  z-index: -1;
+  border-radius: 100%;
+}
+
+
+
+.dashboard-main-box .products-status td .active {
+  padding: 5px 15px;
+  background-color: #DDFFF8;
+  color: #003E32;
+  border-radius: 20px;
+  display: inline-block;
+  width: max-content;
+  /* height: 29px; */
+  text-align: center;
+  font-size: 13px;
+}
+
+.dashboard-main-box .products-status td .active a {
+  color: #003E32 !important;
+}
+
+.dashboard-main-box .products-status td .active.red a {
+  color: #A51B1D !important;
+}
+
+.dashboard-main-box .products-status td .active.red {
+  background-color: #FFE6E7;
+  color: #A51B1D;
+}
+
+.dashboard-main-box .products-status table tr {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #fff;
+
+}
+
+.dashboard-main-box .products-status table tr:last-child {
+  border-bottom: 0;
+}
+
+.salary__slip {
+  background-color: white;
+  width: "210mm";
+  min-height: "297mm";
+  padding: 35px;
+  box-sizing: "border-box";
+}
+
+.salary__slip__table tr {
+  @apply border;
+}
+
+.salary__slip__table tr td {
+  @apply p-2 text-xs;
+}
+
+@media print {
+  .salary__slip {
+    background-color: white;
+    padding: 40px;
+  }
+
+  .salary__slip__table tr {
+    @apply border;
+  }
+
+  .salary__slip__table tr td {
+    @apply p-2 text-xs;
+  }
+}
+
+.payment__button {
+  @apply bg-blue-600 text-white px-2 py-1 border rounded border-blue-600 font-bold;
+  @apply hover:bg-blue-700;
+}
+
+.confirm__modal button {
+  width: 120px;
+  height: 30px;
+  border-radius: 3px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.add_account__section {
+  @apply w-full bg-gray-50 border-gray-200 p-2 rounded;
+}
+
+.add_account__section .add__button {
+  @apply border-blue-400 border bg-blue-50 rounded px-1 py-[2px] text-blue-500
+}
+
+.add_account__section .account__details__body {
+  @apply flex items-center gap-10 text-xs;
+}
+
+.add_account__section .acc__details__text {
+  @apply text-gray-500
+}
+
+.add_account__section .account__details__top__bar {
+  @apply flex justify-between items-center mb-4;
+}
+
+.add_account__section .account__details__top__bar .details__title {
+  @apply font-semibold text-[13px];
+}
+
+.add_account__section .change__remove__btns {
+  @apply flex items-center gap-4;
+}
+
+.add_account__section .change__remove__btns div {
+  @apply text-blue-500 cursor-pointer hover:underline
+}
+
+.add_account__section .change__remove__btns div:last-child {
+  @apply text-red-500
+}
+
+
+.round__off__section {
+  @apply flex justify-between items-center w-full mt-4 h-[25px];
+}
+
+.round__off__section .check__box__parent {
+  @apply flex items-center gap-1;
+}
+
+.roundoff__btn {
+  @apply flex items-center text-[10px] p-[3px] bg-gray-100;
+}
+
+.roundoff__btn.active {
+  @apply bg-blue-200 text-blue-700;
+}
+
+.round__of__input__parent {
+  @apply flex items-center text-sm border rounded;
+}
+
+.round__of__input__parent svg {
+  @apply ml-[2px] text-[13px];
+}
+
+.round__of__input__parent input {
+  @apply border-none rounded-none text-[13px] w-[60px];
+}
+
+
+.feat__card__text {
+  @apply text-[#333333] font-[700] text-[14px];
+}
+
+/* Payment Section in Bill */
+/* ======================= */
+.bill___payment__section {
+  @apply flex justify-center items-end flex-col w-full mt-5 pt-3 pb-4 border-t border-b;
+}
+
+.bill___payment__section .label__checkbox {
+  @apply flex items-center gap-2;
+}
+
+.bill___payment__section .amount__input {
+  @apply w-full flex justify-between items-center overflow-hidden;
+}
+
+.bill___payment__section .amount__and__select input,
+.bill___payment__section .amount__and__select select {
+  @apply border-none rounded-none;
+}
+
+.bill___payment__section .amount__and__select select {
+  @apply w-[140px]
+}
+
+.bill___payment__section .amount__and__select input {
+  @apply bg-slate-50 text-right rounded-tr rounded-br;
+  line-height: normal !important;
+}
+
+.bill___payment__section .amount__and__select svg {
+  @apply text-[20px] bg-slate-50 ml-1 rounded-none
+}
+
+.bill___payment__section .amount__and__select {
+  @apply mt-2 flex items-center border rounded w-[250px]
+}
+
+.bill___payment__section .payment__from {
+  @apply w-full mt-2 flex items-center justify-between;
+}
+
+.bill___payment__section .payment__from select {
+  @apply w-[250px]
+}
+
+
+
+.payment__satelment {
+  @apply w-full overflow-x-auto rounded-md;
+}
+
+.payment__satel__table {
+  @apply min-w-full;
+}
+
+.payment__satel__table tr td {
+  @apply border px-2;
+}
+
+.payment__satel__table thead {
+  @apply bg-[#F6F7FB]
+}
+
+.satelment__search__area {
+  @apply w-full flex flex-col md:flex-row justify-between items-center pt-1 pb-3;
+}
+
+.satelment__search__area p {
+  @apply font-bold text-[15px]
+}
+
+.satelment__search__area div {
+  @apply flex items-center border rounded px-2 py-1;
+}
+
+.satelment__search__area div:focus-within {
+  border: 1px solid #003E32;
+}
+
+.satelment__search__area div svg {
+  @apply text-[16px]
+}
+
+.satelment__search__area input {
+  @apply border-none
+}
+
+.top__details__card {
+  @apply border-[#4d4d4d] w-full rounded p-2;
+  box-shadow: 2px 1px 5px rgb(199, 198, 198);
+}
+
+.staff__make__payment {
+  @apply bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 h-[30px] border-blue-600 border;
+  border-start-start-radius: 5px;
+  border-end-start-radius: 5px;
+}
+
+.staff__make__payment__drpdwn {
+  @apply bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 h-[30px] border-blue-600 border;
+  border-start-end-radius: 5px;
+  border-end-end-radius: 5px;
+  border-left-color: white;
+}
+
+.context__menu {
+  @apply w-[150px] h-[auto] z-[999999] rounded border absolute bg-white flex-col justify-evenly hidden p-1;
+  box-shadow: 0px 0px 10px rgb(153, 153, 153);
+}
+
+
+/* Confirm Modal */
+.confirm__modal button:hover {
+  background-color: #e7f5f3;
+}
+
+/* .confirm__modal button.cancel {
+  border: 1px solid #cfd0d3;
+} */
+
+.confirm__modal button.yes {
+  border: 1px solid red;
+  color: red;
+  margin-left: 10px;
+}
+
+.confirm__modal .rs-modal-content {
+  border-radius: 4px;
+  border: 1px solid #dcdcdc;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.confirm__modal .rs-modal-body {
+  padding: 22px;
+}
+
+.confirm__modal button {
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.confirm__modal button:focus {
+  outline: 1px solid #2563eb;
+  outline-offset: 1px;
+}

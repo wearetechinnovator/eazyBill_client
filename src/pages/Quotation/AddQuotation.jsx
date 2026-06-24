@@ -1,0 +1,980 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { SelectPicker, Button } from 'rsuite';
+import Nav from '../../components/Nav';
+import SideNav from '../../components/SideNav';
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { MdCurrencyRupee } from "react-icons/md";
+import { MdOutlinePlaylistAdd } from "react-icons/md";
+import useMyToaster from '../../hooks/useMyToaster';
+import useApi from '../../hooks/useApi';
+import useBillPrefix from '../../hooks/useBillPrefix';
+import Cookies from 'js-cookie';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import AddPartyModal from '../../components/AddPartyModal';
+import { useDispatch, useSelector } from 'react-redux';
+import AddItemModal from '../../components/AddItemModal';
+import MySelect2 from '../../components/MySelect2';
+import { Icons } from '../../helper/icons';
+import useFormHandle from '../../hooks/useFormHandle';
+import SelectAccountModal from '../../components/SelectAccountModal';
+import Loading from '../../components/Loading';
+
+
+
+
+
+const Quotation = ({ mode }) => {
+	const toast = useMyToaster();
+	const token = Cookies.get("token");
+	const dispatch = useDispatch();
+	const getPartyModalState = useSelector((store) => store.partyModalSlice.show);
+	const getItemModalState = useSelector((store) => store.itemModalSlice.show);
+	const location = useLocation();
+	const navigate = useNavigate();
+	const { id } = useParams()
+	const [loading, setLoading] = useState(false);
+	const getBillPrefix = useBillPrefix("quotation");
+	const { getApiData } = useApi();
+	const itemRowSet = {
+		QuotaionItem: 1, itemName: '', description: '', hsn: '', qun: '1',
+		unit: [], selectedUnit: '', price: '', discountPerAmount: '', discountPerPercentage: '',
+		tax: '', taxAmount: '', amount: '', perDiscountType: "", //for checking purpose only
+	}
+	const additionalRowSet = {
+		additionalRowsItem: 1, particular: '', amount: ''
+	}
+	const [ItemRows, setItemRows] = useState([itemRowSet]);
+	const [additionalRows, setAdditionalRow] = useState([additionalRowSet]); //{ additionalRowsItem: 1 }
+	const [formData, setFormData] = useState({
+		party: '', quotationNumber: '', estimateDate: new Date().toISOString().split('T')[0], validDate: '',
+		items: ItemRows, additionalCharge: additionalRows, note: '',
+		terms: "",
+		discountType: '',
+		discountAmount: '', discountPercentage: '', finalAmount: '', autoRoundOff: false, roundOffType: '0',
+		roundOffAmount: '', enqNumber: '', deliveryTime: ''
+	})
+
+	const [perPrice, setPerPrice] = useState(null);
+	const [perTax, setPerTax] = useState(null);
+	const [perDiscount, setPerDiscount] = useState(null);
+	const [perQun, setPerQun] = useState(null)
+	// When change discount type;
+	const [discountToggler, setDiscountToggler] = useState(true);
+	const [accountToggler, setAccountToggler] = useState(false);
+	const [accountDetails, setAccountDetails] = useState(null);
+
+	// Store all items without filter
+	const [items, setItems] = useState([]);
+	const [unit, setUnit] = useState([]);
+	const [tax, setTax] = useState([]);
+	const [party, setParty] = useState([]);
+
+	// store item label and value pair for dropdown
+	const [itemData, setItemData] = useState([])
+	const [taxData, setTaxData] = useState([]);
+
+	// Form hook
+	const {
+		onItemChange, addItem, deleteItem, changeDiscountType,
+		calculateFinalAmount
+	} = useFormHandle();
+
+
+
+
+
+	// Get data when mode is update
+	const get = async () => {
+		const URL = process.env.REACT_APP_API_URL + "/quotation/get";
+
+		try {
+			const req = await fetch(URL, {
+				method: "POST",
+				headers: {
+					"Content-Type": 'application/json'
+				},
+				body: JSON.stringify({ token, id: id })
+			})
+			const res = await req.json();
+			setFormData({
+				...formData, ...res.data,
+				estimateDate: res.data.estimateDate.split('T')[0],
+				validDate: res.data.validDate ? res.data.validDate.split('T')[0] : '',
+			});
+
+			setAdditionalRow([...res.data.additionalCharge])
+			setItemRows([...res.data.items]);
+			setAccountDetails(res.data.accountId || null);
+			if (res.data.discountType && res.data.discountType != "no") {
+				setDiscountToggler(false);
+			}
+		} catch (error) {
+			return toast("Something went wrong to get data", 'error')
+		}
+	}
+	useEffect(() => {
+		if (!id) return;
+		get();
+	}, [id])
+
+
+
+	useEffect(() => {
+		if (getBillPrefix && !mode) {
+			setFormData({ ...formData, quotationNumber: getBillPrefix[0] + getBillPrefix[1] });
+		} else if (mode) {
+			get();
+		}
+	}, [getBillPrefix?.length, mode])
+
+
+	// get data from api like item, unit, tax, party
+	useState(() => {
+		const apiData = async () => {
+			{
+				const data = await getApiData("item");
+				setItems([...data.data]);
+
+				const newItemData = data.data.map(d => ({ label: d.title, value: d.title }));
+				setItemData(newItemData);
+			}
+			{
+				const data = await getApiData("unit");
+				const unit = data.data.map(d => ({ label: d.title, value: d.title }));
+				setUnit([...unit]);
+			}
+			{
+				const data = await getApiData("tax");
+				const tax = data.data.map(d => ({ label: d.title, value: d.gst }));
+				setTax([...data.data]);
+				setTaxData([...tax]);
+			}
+			{
+				const data = await getApiData("party");
+				const party = data.data.map(d => ({ label: d.name, value: d._id }));
+				setParty([...party]);
+			}
+		}
+
+		apiData();
+
+	}, [])
+
+
+	// When `discount type is before` and apply discount this useEffect run;
+	useEffect(() => {
+		if (formData.discountType === "before" && ItemRows.length > 0) {
+			setItemRows(prevItems =>
+				prevItems.map(i => {
+					const percentage = ((parseFloat(formData.discountAmount || 0) / parseFloat(i.price || 0) * 100)).toFixed(2);
+					const amount = (parseFloat(formData.discountAmount || 0) / parseFloat(prevItems.length)).toFixed(2);
+					return {
+						...i,
+						discountPerPercentage: percentage,
+						discountPerAmount: amount,
+					}
+				})
+			);
+		}
+	}, [formData.discountAmount, ItemRows.length]);
+
+
+	const onPerDiscountAmountChange = (val, index) => {
+		let item = [...ItemRows];
+		let amount = parseFloat(item[index].price) * parseFloat(item[index].qun);
+		let percentage = ((parseFloat(val) / amount) * 100).toFixed(2);
+
+		if (item[index].perDiscountType !== "percentage" || formData.discountType === "before") {
+			item[index].discountPerAmount = isNaN(val) || val === 0 ? (0).toFixed(2) : val;
+			item[index].discountPerPercentage = isNaN(percentage) ? (0).toFixed(2) : percentage;
+		}
+		setItemRows(item);
+
+	}
+
+
+	const onPerDiscountPercentageChange = (val, index) => {
+		let item = [...ItemRows];
+		let amount = parseFloat(item[index].price) * parseFloat(item[index].qun);
+		// let percentage = (parseFloat(val) / amount) * 100;
+		let dis_amount = amount / 100 * val
+
+		if (item[index].perDiscountType !== "amount" || formData.discountType === "before") {
+			item[index].discountPerPercentage = val;
+			item[index].discountPerAmount = (dis_amount).toFixed(2);
+		}
+		setItemRows(item);
+
+	}
+
+
+	const calculatePerTaxAmount = (index) => {
+		const tax = ItemRows[index].tax / 100;
+		const qun = ItemRows[index].qun;
+		const price = ItemRows[index].price;
+		const disAmount = ItemRows[index].discountPerAmount;
+		const amount = ((qun * price) - disAmount);
+		const taxamount = (amount * tax).toFixed(2);
+
+		return taxamount;
+	}
+
+
+	const calculatePerAmount = (index) => {
+		const qun = ItemRows[index].qun;
+		const price = ItemRows[index].price;
+		const disAmount = ItemRows[index].discountPerAmount;
+		const totalPerAmount = parseFloat((qun * price) - disAmount) + parseFloat(calculatePerTaxAmount(index));
+
+		return (totalPerAmount).toFixed(2);
+	}
+
+
+	// Calculate Final Amount
+	useEffect(() => {
+		if (!getBillPrefix) return;
+		const finalAmount = calculateFinalAmount(
+			additionalRows, formData, subTotal,
+			formData.autoRoundOff,
+			formData.roundOffAmount,
+			formData.roundOffType
+		);
+		setFormData((prevData) => ({
+			...prevData,
+			finalAmount,
+			quotationNumber: getBillPrefix[0] + getBillPrefix[1]
+		}));
+	}, [ItemRows, additionalRows,
+		formData.autoRoundOff, formData.roundOffAmount, formData.roundOffType,
+		formData.discountAmount, formData.discountType
+	]);
+
+
+
+
+	// Return Sub-Total
+	/*
+	  Total Discount.
+	  Total Tax.
+	  Total Amount.
+	*/
+	const subTotal = useCallback(() => {
+		const subTotal = (which) => {
+			let total = 0;
+
+			ItemRows.forEach((item, index) => {
+				if (which === "discount") {
+					if (item.discountPerAmount) {
+						total = (parseFloat(total) + parseFloat(item.discountPerAmount)).toFixed(2)
+					}
+				}
+				else if (which === "tax") {
+					total = (parseFloat(total) + parseFloat(calculatePerTaxAmount(index))).toFixed(2);
+				}
+				else if (which === "amount") {
+					total = (parseFloat(total) + parseFloat(calculatePerAmount(index))).toFixed(2);
+					// setFormData({...formData, finalAmount: total});
+				}
+			})
+
+			return !isNaN(total) ? total : 0.00;
+
+		}
+		return subTotal;
+	}, [ItemRows, perPrice, perTax, perDiscount, perQun])
+
+
+
+	const onDiscountAmountChange = (e) => {
+		if (discountToggler !== null) {
+			const value = e.target.value || (0).toFixed(2);
+			let per = ((value / subTotal()('amount')) * 100).toFixed(2) //Get percentage
+			setFormData({ ...formData, discountAmount: e.target.value, discountPercentage: per });
+
+		}
+
+	}
+
+
+	// *Save bill
+	const saveBill = async () => {
+		if (formData.party === "") {
+			return toast("Please select party", "error")
+		} else if (formData.estimateDate === "") {
+			return toast("Please enter sales return number", "error")
+		}
+
+		for (let row of ItemRows) {
+			if (row.itemName === "") {
+				return toast("Please select item", "error")
+			} else if (row.qun === "") {
+				return toast("Please enter quantity", "error")
+			} else if (row.unit === "") {
+				return toast("Please select unit", "error")
+			} else if (row.price === "") {
+				return toast("Please enter price", "error")
+			}
+		}
+
+		// Add Per Item Tax and Amound before save
+		ItemRows.forEach((row, index) => {
+			row.taxAmount = calculatePerTaxAmount(index);
+			row.amount = calculatePerAmount(index);
+		});
+		setItemRows([...ItemRows]);
+
+		try {
+			setLoading(true);
+			const url = process.env.REACT_APP_API_URL + "/quotation/add";
+			const token = Cookies.get("token");
+
+			const req = await fetch(url, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(
+					!mode ? { ...formData, token, accountId: accountDetails?._id } :
+						{ ...formData, token, update: true, id: id, accountId: accountDetails?._id }
+				)
+			})
+			const res = await req.json();
+			if (req.status !== 200 || res.err) {
+				return toast(res.err, 'error');
+			}
+
+			if (mode) {
+				return toast('Quotation update successfully', 'success');
+			}
+
+			clearForm();
+
+			toast('Quotation add successfully', 'success');
+			navigate('/admin/quotation-estimate')
+			return
+
+		} catch (error) {
+			return toast('Something went wrong', 'error')
+		} finally {
+			setLoading(false);
+		}
+
+	}
+
+
+	// CONVERT: Enquiry to Qut;
+	useEffect(() => {
+		if (!location.state) return;
+		const data = location.state;
+
+		setFormData({
+			...formData,
+			party: data.party._id,
+			enqNumber: data.enqNo,
+			deliveryTime: data.deliveryDate.split("T")[0],
+			enquiryId: data._id
+		});
+
+		setItemRows(
+			data.items.map((item) => ({
+				...itemRowSet,
+				itemName: item.item.title,
+				qun: item.qty,
+				itemId: item.item._id,
+				hsn: item.item.hsn,
+				price: item.item.salePrice,
+				unit: item.item?.unit?.map((u) => u.unit)
+			}))
+		);
+	}, [location]);
+
+	// *Clear form values;
+	const clearForm = () => {
+		setItemRows([itemRowSet]);
+		setAdditionalRow([additionalRowSet])
+		setFormData({
+			party: '', quotationNumber: '', estimateDate: '', validDate: '', items: ItemRows,
+			additionalCharge: additionalRows, note: '', terms: '',
+			discountType: '', discountAmount: '', discountPercentage: '',
+		});
+
+	}
+
+
+
+	return (
+		<>
+			<Nav title={mode ? "Update Quotation" : "Add Quotation"} />
+			<main id='main'>
+				<SideNav />
+				<AddPartyModal open={getPartyModalState} />
+				<AddItemModal open={getItemModalState} />
+				<SelectAccountModal
+					openModal={accountToggler}
+					openStatus={() => {
+						setAccountToggler(false);
+					}}
+					getAccountDetails={(account) => {
+						setAccountDetails(account);
+					}}
+				/>
+
+				<div className='content__body'>
+					<div className='content__body__main bg-white' id='addQuotationTable'>
+						<div className='flex flex-col lg:flex-row items-center justify-around gap-4'>
+							<div className='flex flex-col gap-2 w-full'>
+								<p className='text-xs'>Select Party <span className='required__text'>*</span></p>
+								<MySelect2
+									model={"party"}
+									partyType={"customer"}
+									onType={(v) => {
+										setFormData({ ...formData, party: v })
+									}}
+									value={formData.party?._id || formData.party}
+								/>
+							</div>
+							<div className='flex flex-col gap-2 w-full lg:w-1/2'>
+								<p className='text-xs'>Quotation / Est. Number <span className='required__text'>*</span></p>
+								<input type="text"
+									onChange={(e) => setFormData({ ...formData, quotationNumber: e.target.value })}
+									value={formData.quotationNumber}
+								/>
+							</div>
+							<div className='flex flex-col gap-2 w-full lg:w-1/2'>
+								<p className='text-xs'>Quotation / Est. Date <span className='required__text'>*</span></p>
+								<input
+									type='date'
+									onChange={(e) => {
+										setFormData({ ...formData, estimateDate: e.target.value })
+									}}
+									value={formData.estimateDate}
+								/>
+							</div>
+							<div className='flex flex-col gap-2 w-full lg:w-1/2'>
+								<p className='text-xs'>Valid To</p>
+								<input
+									type='date'
+									onChange={(e) => {
+										setFormData({ ...formData, validDate: e.target.value })
+									}}
+									value={formData.validDate}
+								/>
+							</div>
+							<div className='flex flex-col gap-2 w-full lg:w-1/2'>
+								<p className='text-xs'>ENQ Number</p>
+								<input
+									type='text'
+									onChange={(e) => {
+										setFormData({ ...formData, enqNumber: e.target.value })
+									}}
+									value={formData.enqNumber}
+								/>
+							</div>
+							<div className='flex flex-col gap-2 w-full lg:w-1/2'>
+								<p className='text-xs'>Delivery Time</p>
+								<input
+									type='text'
+									onChange={(e) => {
+										setFormData({ ...formData, deliveryTime: e.target.value })
+									}}
+									value={formData.deliveryTime}
+								/>
+							</div>
+						</div>
+
+						<div className='bill__and__sping__adr'>
+
+						</div>
+
+						<div className='overflow-x-auto rounded'>
+							<table className='add__table min-w-full table-style'>
+								<thead >
+									<tr>
+										<th style={{ "width": "*" }}>Item</th>
+										<th style={{ "width": "5%" }}>HSN/SAC</th>
+										<th style={{ "width": "5%" }}>QTY</th>
+										<th style={{ "width": "5%" }}>Unit</th>
+										<th style={{ "width": "5%" }}>Price/Item</th>
+										<th style={{ "width": "7%" }}>Discount</th>
+										<th style={{ "width": "8%" }}>Tax</th>
+										<th style={{ "width": "7%" }}>Amount</th>
+										<th style={{ "width": "3%" }}></th>
+									</tr>
+								</thead>
+								<tbody>
+									{ItemRows.map((i, index) => (
+										<tr key={i.QuotaionItem} className='border-b'>
+
+											{/* Item name and description */}
+											<td>
+												<div className='flex flex-col gap-1 text-left'>
+													<MySelect2
+														model={"item"}
+														onType={(v) => {
+															if (v === ItemRows[index].itemId) return;
+															onItemChange(v, index, tax, ItemRows, setItemRows, setItems)
+														}}
+														value={ItemRows[index].itemId}
+													/>
+
+													<input type='text' className='input-style' placeholder='Description'
+														onChange={(e) => {
+															let item = [...ItemRows];
+															item[index].description = e.target.value;
+															setItemRows(item);
+														}}
+														value={ItemRows[index].description}
+													/>
+												</div>
+											</td>
+											<td>
+												<input type='text' className='w-[70px] input-style'
+													onChange={(e) => {
+														let item = [...ItemRows];
+														item[index].hsn = e.target.value;
+														setItemRows(item);
+													}}
+													value={ItemRows[index].hsn}
+												/>
+											</td>
+											<td>
+												<input type='text' className='input-style'
+													onChange={(e) => {
+														let item = [...ItemRows];
+														item[index].qun = e.target.value;
+														setItemRows(item);
+														setPerQun(e.target.value);
+														if (formData.discountType !== "before") {
+														}
+														onPerDiscountPercentageChange(formData.items[index].discountPerPercentage, index);
+														onPerDiscountAmountChange(formData.items[index].discountPerAmount, index);
+													}}
+													value={ItemRows[index].qun}
+												/>
+											</td>
+											<td>
+												<select className='input-style'
+													onChange={(e) => {
+														let item = [...ItemRows];
+														item[index].selectedUnit = e.target.value;
+														setItemRows(item);
+													}}
+													value={ItemRows[index].selectedUnit}
+												>
+													{
+														ItemRows[index].unit?.map((u, _) => {
+															return <option key={_} value={u}>{u}</option>
+														})
+													}
+												</select>
+											</td>
+											<td align='center'>
+												<div>
+													<input type='text' className='input-style'
+														onChange={(e) => {
+															let item = [...ItemRows];
+															item[index].price = e.target.value;
+															setItemRows(item);
+															setPerPrice(e.target.value);
+															if (formData.discountType !== "before") {
+															}
+															onPerDiscountPercentageChange(formData.items[index].discountPerPercentage, index);
+															onPerDiscountAmountChange(formData.items[index].discountPerAmount, index);
+														}}
+														value={ItemRows[index].price}
+													/>
+												</div>
+											</td>
+											<td> {/** Discount amount and percentage */}
+												<div className={`w-full flex flex-col gap-1 items-center`} >
+													<div className='add-table-discount-input'>
+														<input type="text"
+															className={`${formData.discountType === 'before' ? 'bg-gray-100' : ''} `}
+															onChange={formData.discountType !== 'before' ? (e) => {
+																let form = { ...formData };
+																form.items[index].perDiscountType = 'amount';
+																setFormData({ ...form });
+																onPerDiscountAmountChange(e.target.value, index)
+															} : null}
+															value={ItemRows[index].discountPerAmount}
+														// value={calculatePerDiscountAmount(index)}
+														/>
+														<div><MdCurrencyRupee /></div>
+													</div>
+													<div className='add-table-discount-input' >
+														<input type="text"
+															className={`${formData.discountType === 'before' ? 'bg-gray-100' : ''} `}
+															onChange={formData.discountType !== 'before' ? (e) => {
+																let form = { ...formData };
+																form.items[index].perDiscountType = 'percentage';
+																setFormData({ ...form });
+																onPerDiscountPercentageChange(e.target.value, index)
+															} : null}
+															value={ItemRows[index].discountPerPercentage}
+														// value={calculatePerDiscountPercentage(index)}
+														/>
+														<div>%</div>
+													</div>
+												</div>
+											</td>
+											<td> {/** Tax and Taxamount */}
+												<div className='flex flex-col gap-1'>
+													<SelectPicker
+														onChange={(v) => {
+															let item = [...ItemRows];
+															item[index].tax = v;
+															setItemRows(item);
+															setPerTax('')
+														}}
+														value={ItemRows[index].tax}
+														data={taxData}
+													/>
+													<input type="text"
+														onChange={(e) => {
+															let item = [...ItemRows];
+															item[index].taxAmount = e.target.value;
+															setItemRows(item);
+														}}
+														value={calculatePerTaxAmount(index)}
+													/>
+												</div>
+											</td>
+											<td align='center'>
+												<div>
+													<input type="text"
+														value={calculatePerAmount(index)}
+														className='bg-gray-100 custom-disabled'
+														disabled
+													/>
+												</div>
+											</td>
+											<td align='center' className='w-[20px]'>
+												<RiDeleteBin6Line
+													className='cursor-pointer text-[16px]'
+													onClick={() => ItemRows.length > 1 && deleteItem(1, index, setItemRows, setFormData, setAdditionalRow)}
+												/>
+											</td>
+										</tr>
+									))}
+								</tbody>
+								<tfoot>
+									<tr>
+										<td colSpan={9}>
+											<Button className='float-right w-full font-bold' onClick={() => addItem(1, itemRowSet, setItemRows, setFormData, additionalRowSet, setAdditionalRow)}>
+												<MdOutlinePlaylistAdd className='text-lg mr-1' />
+												Add Item
+											</Button>
+										</td>
+									</tr>
+									<tr>
+										<td colSpan={5} align='right'>
+											<p className='py-2 font-bold'>Sub-Total</p>
+										</td>
+										<td>{subTotal()('discount')}</td>
+										<td>{subTotal()('tax')}</td>
+										<td>{subTotal()('amount')}</td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+						{/* --------- Tax amount table ------- */}
+						<div className='overflow-x-auto rounded' id='taxAmountTable'>
+							<table className='table-style w-full'>
+								<thead>
+									<tr>
+										<th className='font-bold'>Total Taxable Amount</th>
+										<th className='font-bold'>Total Tax Amount</th>
+										<th>
+											<span className='font-bold mr-1'>Discount Type</span>
+											<span>(Additional)</span>
+										</th>
+										<th>
+											<span className='font-bold mr-1'>Discount Amount</span>
+											<span>(Additional)</span>
+										</th>
+										<th>
+											<span className='font-bold mr-1'>Discount Percentage</span>
+											<span>(Additional)</span>
+										</th>
+										<th className='font-bold'>Total Amount</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td className='min-w-[150px]'>
+											<input type="text" name="total_taxable_amount"
+												value={(subTotal()('amount') - subTotal()('tax')).toFixed(2)}
+												className='bg-gray-100 custom-disabled'
+												disabled
+											/>
+										</td>
+										<td className='min-w-[150px]'>
+											<input type="text" name='total_tax_amount'
+												value={subTotal()('tax')}
+												className='bg-gray-100 custom-disabled'
+												disabled
+											/>
+										</td>
+										<td className='min-w-[180px]'>
+											<select name="discount_type" value={formData.discountType} onChange={(e) => {
+												changeDiscountType(e, ItemRows, formData, setFormData, setDiscountToggler, toast)
+											}}>
+												<option value="no">No Discount</option>
+												<option value="before">Before Tax</option>
+												<option value="after">After Tax</option>
+											</select>
+										</td>
+
+										<td className='min-w-[180px]'>
+											<div className='add-table-discount-input' >
+												<input
+													id='discountAmount'
+													type="text"
+													onChange={(e) => discountToggler ? null : onDiscountAmountChange(e)}
+													value={formData.discountAmount}
+													className={`${discountToggler ? 'bg-gray-100 custom-disabled' : ''}`}
+													disabled={discountToggler ? true : false}
+												/>
+												<div><MdCurrencyRupee /></div>
+											</div>
+										</td>
+										<td className='min-w-[200px]'>
+											<div className='add-table-discount-input'>
+												<input
+													type="text"
+													id='discountPercentage'
+													className={`${discountToggler ? 'bg-gray-100 custom-disabled' : ''}`}
+													disabled={discountToggler ? true : false}
+													onChange={discountToggler ? null : (e) => {
+														let amount = ((subTotal()('amount') / 100) * e.target.value).toFixed(2);
+														setFormData({
+															...formData, discountPercentage: e.target.value, discountAmount: amount,
+														})
+
+														if (formData.discountType === "before") {
+															let items = [...ItemRows];
+															items.forEach((i, _) => {
+																// i.discountPerAmount = amount / parseFloat(items.length);
+																i.discountPerPercentage = e.target.value;
+															})
+
+															setItemRows([...items]);
+														}
+													}}
+													value={formData.discountPercentage}
+												/>
+												<div>%</div>
+											</div>
+										</td>
+										<td className='min-w-[150px]'>
+											<input type="text" name="total_amount"
+												value={subTotal()('amount')}
+												className='bg-gray-100 custom-disabled'
+												disabled
+											/>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						{/* ------- Note and Additional charges ------- */}
+						<div className='w-full flex flex-col lg:flex-row justify-between gap-4 mt-3'>
+							<div className='flex flex-col w-full gap-3'>
+								<div>
+									<p>Note: </p>
+									<textarea
+										onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+										value={formData.note}
+									></textarea>
+								</div>
+								<div>
+									<p>Terms & Conditions:</p>
+									<textarea
+										rows={10}
+										onChange={(e) => setFormData({ ...formData, terms: e.target.value })}
+										value={formData.terms}
+									></textarea>
+								</div>
+
+								{/* Add Bank Account */}
+								<div className='add_account__section'>
+									{
+										accountDetails === null && (
+											<button
+												className='add__button'
+												onClick={() => setAccountToggler(true)}
+											>
+												<Icons.ADD className='inline mr-1' />
+												Add Bank Account
+											</button>
+										)
+									}
+									{
+										accountDetails !== null && (
+											<div>
+												<div className='account__details__top__bar'>
+													<p className='details__title'>Bank Details</p>
+
+													<div className='change__remove__btns'>
+														<div onClick={() => {
+															setAccountToggler(true);
+														}}>
+															Change Account
+														</div>
+														<div onClick={() => {
+															setAccountDetails(null);
+														}}>
+															Remove Account
+														</div>
+													</div>
+												</div>
+
+												<div className='account__details__body'>
+													<div>
+														<p className='acc__details__text'>Account Number: </p>
+														<p className='acc__details__text'>IFSC Code:</p>
+														<p className='acc__details__text'>Bank Name:</p>
+														<p className='acc__details__text'>Account Holder's Name:</p>
+													</div>
+													<div>
+														<p>{accountDetails?.accountNumber}</p>
+														<p>{accountDetails?.ifscCode}</p>
+														<p>{accountDetails?.bankName}</p>
+														<p>{accountDetails?.holderName}</p>
+													</div>
+												</div>
+											</div>
+										)
+									}
+								</div>
+
+							</div>
+							<div className='w-full'>
+								<div className='uppercase font-bold border border-dashed p-2 rounded'>
+									Additional Charges
+								</div>
+								<div className='overflow-x-auto rounded mt-3' id='addtionalChargeTable'>
+									<table className='table-style w-full'>
+										<thead className='bg-gray-100'>
+											<tr>
+												<th>Particular</th>
+												<th>Amount</th>
+												<th>Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											{
+												additionalRows.map((i, index) => (
+													<tr key={i.additionalRowsItem}>
+														<td>
+															<input type="text"
+																onChange={(e) => {
+																	let item = [...additionalRows];
+																	item[index].particular = e.target.value;
+																	setAdditionalRow(item);
+																}}
+																value={additionalRows[index].particular}
+															/>
+														</td>
+														<td>
+															<input type="text"
+																onChange={(e) => {
+																	let item = [...additionalRows];
+																	item[index].amount = e.target.value;
+																	setAdditionalRow(item);
+																}}
+																value={additionalRows[index].amount}
+															/>
+														</td>
+														<td align='center'>
+															<Icons.DELETE
+																className='cursor-pointer text-lg'
+																onClick={() => deleteItem(2, index, setItemRows, setFormData, setAdditionalRow)}
+															/>
+														</td>
+													</tr>
+												))
+											}
+										</tbody>
+										<tfoot>
+											<tr>
+												<td colSpan={3}>
+													<Button color='blue' className='float-right w-full font-bold' onClick={() => addItem(2, itemRowSet, setItemRows, setFormData, additionalRowSet, setAdditionalRow)}>
+														<MdOutlinePlaylistAdd className='text-lg mr-1' />
+														Add Item
+													</Button>
+												</td>
+											</tr>
+										</tfoot>
+									</table>
+								</div>
+
+								{/* Round Off Section */}
+								<div className='round__off__section'>
+									<div className='check__box__parent'>
+										<input type="checkbox"
+											onChange={(e) => setFormData({
+												...formData, autoRoundOff: e.target.checked
+											})}
+											checked={formData.autoRoundOff}
+										/>
+										<p>Auto Round Off</p>
+									</div>
+
+									{!formData.autoRoundOff && (
+										<div className='round__of__input__parent'>
+											<button
+												onClick={() => {
+													setFormData({ ...formData, roundOffType: '1' })
+												}}
+												className={`roundoff__btn ${formData.roundOffType === "1" ? 'active' : ''}`}
+											>
+												Add <span>(+)</span>
+											</button>
+											<Icons.RUPES />
+											<input type="text"
+												value={formData.roundOffAmount}
+												onChange={(e) => setFormData({ ...formData, roundOffAmount: e.target.value })}
+											/>
+											<button
+												onClick={() => {
+													setFormData({ ...formData, roundOffType: '0' })
+												}}
+												className={`roundoff__btn ${formData.roundOffType === "0" ? 'active' : ''}`}
+											>
+												Reduce <span>(-)</span>
+											</button>
+										</div>
+									)}
+								</div>
+
+								<p className='font-bold mt-4 mb-2'>Final Amount</p>
+								<input type="text" name="final_amount"
+									className='bg-gray-100 custom-disabled w-full'
+									disabled
+									value={formData.finalAmount}
+								/>
+							</div>
+						</div>
+					</div>
+					{/* Content Body Main Close */}
+					<div className='form-btn-bar'>
+						<button
+							onClick={loading ? null : saveBill}
+							className='add-bill-btn'>
+							{loading ? <Loading /> : <Icons.CHECK />}
+							{!mode ? "Save" : "Update"}
+						</button>
+						<button className='reset-bill-btn' onClick={clearForm}>
+							<Icons.RESET />
+							Reset
+						</button>
+					</div>
+				</div>
+				{/* Content Body Close */}
+			</main>
+		</>
+	)
+}
+
+export default Quotation;
