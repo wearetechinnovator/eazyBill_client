@@ -35,10 +35,10 @@ const PurchaseInvoice = ({ mode }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const itemRowSet = {
-		rowItem: 1, itemName: '', description: '', hsn: '', qun: '1', itemId: '',
+		rowItem: 1, itemName: '', description: '', hsn: '', qun: '1', remainingQun: 1, itemId: '',
 		unit: [], selectedUnit: "", price: '', discountPerAmount: '', discountPerPercentage: '',
 		tax: '', taxAmount: '', amount: '', perDiscountType: "", //for checking purpose only
-		expireDate: '', id: '',
+		expireDate: '', id: '', 
 	}
 	const additionalRowSet = {
 		additionalRowsItem: 1, particular: '', amount: ''
@@ -63,13 +63,9 @@ const PurchaseInvoice = ({ mode }) => {
 
 	// Store all items without filter
 	const [items, setItems] = useState([]);
-	// Store units
 	const [unit, setUnit] = useState([]);
-	// Store taxes
 	const [tax, setTax] = useState([]);
-	// Store party
 	const [party, setParty] = useState([]);
-	// Account
 	const [account, setAccount] = useState([])
 
 
@@ -465,6 +461,7 @@ const PurchaseInvoice = ({ mode }) => {
 													onChange={(e) => {
 														let item = [...ItemRows];
 														item[index].qun = e.target.value;
+														item[index].remainingQun = e.target.value;
 														setItemRows(item);
 														setPerQun(e.target.value);
 														if (formData.discountType !== "before") {

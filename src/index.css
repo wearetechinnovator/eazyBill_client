@@ -70,7 +70,8 @@
 
 .content__body {
   width: 100%;
-  background: linear-gradient(90deg, rgba(230, 236, 223, 1) 56%, rgba(237, 244, 251, 1) 86%);
+  /* background: linear-gradient(90deg, rgba(230, 236, 223, 1) 56%, rgba(237, 244, 251, 1) 86%); */
+  background: #f0f0f1;
   padding: 10px;
   padding-bottom: 0px;
   overflow-y: auto;

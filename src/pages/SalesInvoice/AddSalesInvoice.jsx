@@ -92,7 +92,8 @@ const SalesInvoice = ({ mode }) => {
 
 
 	// Get Purchase Bill by Item id;
-	const getPurchaseInvoice = async (itemId) => {
+	// update field er kah ei API controller file a lekha ache;
+	const getPurchaseInvoice = async (itemId, update = false) => {
 		if (!itemId) return;
 
 		try {
@@ -102,7 +103,7 @@ const SalesInvoice = ({ mode }) => {
 				headers: {
 					"Content-Type": 'application/json'
 				},
-				body: JSON.stringify({ token, itemId })
+				body: JSON.stringify({ token, itemId, update })
 			})
 			const res = await req.json();
 			if (req.status !== 200 || res.err) {
@@ -114,7 +115,7 @@ const SalesInvoice = ({ mode }) => {
 				const expiryDate = getItemObj?.expireDate?.split("T")[0];
 				const date = new Date(expiryDate);
 
-				const qty = `${getItemObj.qun} ${getItemObj.selectedUnit}`;
+				const qty = `${getItemObj.remainingQun} ${getItemObj.selectedUnit}`;
 				const year = expiryDate ? date.getFullYear() : '';
 				const monthName = expiryDate ? date.toLocaleString("en-US", {
 					month: "short"
@@ -127,11 +128,12 @@ const SalesInvoice = ({ mode }) => {
 				}
 			})
 
-			setSettleInvoice(sattleInv);
+			// Store as label and value pair.
+			setSettleInvoice(prev => [...prev, { itemId, sattleInv }]);
+
 			SetAllSettleInvoice(res);
 
 		} catch (err) {
-			console.log(err)
 			return toast("Data not get something went wrong", 'error')
 		}
 	}
@@ -279,6 +281,11 @@ const SalesInvoice = ({ mode }) => {
 				setAdditionalRow([...res.data.additionalCharge]);
 				setItemRows([...res.data.items]);
 				setAccountDetails(res.data.accountId || null);
+
+				for (const item of res.data.items) {
+					const isEdit = mode === "edit";
+					await getPurchaseInvoice(item.itemId, isEdit);
+				}
 
 
 				// Check Payment Status if Unpaid then process otherwise don't edit page;
@@ -477,6 +484,44 @@ const SalesInvoice = ({ mode }) => {
 	}
 
 
+	const checkSettelmentQty = () => {
+		const allItems = formData.items;
+
+		for (const item of allItems) {
+			const reqQty = Number(item.qun);
+			const settlementInv = item.settleInvoice || [];
+
+			// if User not select any settlement, This is also valid
+			// Bill quantity detect in FIFO order.
+			if (settlementInv.length < 1) continue;
+
+			// Selected purchase invoices me is item ka total remaining qty
+			const availableQty = allSettleInvoice
+				.filter(inv => settlementInv.includes(inv._id))
+				.reduce((acc, invoice) => {
+					const itemQty = invoice.items
+						.filter(pItem => pItem.itemId === item.itemId)
+						.reduce((sum, pItem) => sum + Number(pItem.remainingQun || 0),
+							0
+						);
+
+					return acc + itemQty;
+				}, 0);
+
+			if (reqQty > availableQty) {
+				return {
+					status: false,
+					message: `${item.itemName} quantity exceeds available stock. Available: ${availableQty}, Required: ${reqQty}`
+				};
+			}
+		}
+
+		return {
+			status: true
+		};
+	};
+
+
 	// Save bill
 	const saveBill = async ({ isNew = false }) => {
 		if (!formData.party) {
@@ -500,12 +545,21 @@ const SalesInvoice = ({ mode }) => {
 			}
 		}
 
+
+		// Check item and settlement QTY
+		const checkSettlementQty = checkSettelmentQty();
+		if (!checkSettlementQty.status) {
+			return toast(checkSettlementQty.message, 'warning');
+		}
+
+
 		// Add Per Item Tax and Amound before save
 		ItemRows.forEach((row, index) => {
 			row.taxAmount = calculatePerTaxAmount(index);
 			row.amount = calculatePerAmount(index);
 		});
 		setItemRows([...ItemRows]);
+
 
 		try {
 			setLoading(true);
@@ -533,7 +587,6 @@ const SalesInvoice = ({ mode }) => {
 
 
 			// if this is converted by proforma then delete the Proforma or Quotation
-			// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 			if (mode === "convert" && fromWhichBill === "proforma") {
 				try {
 					await fetch(process.env.REACT_APP_API_URL + "/proforma/delete", {
@@ -575,6 +628,7 @@ const SalesInvoice = ({ mode }) => {
 			navigate('/admin/sales-invoice')
 			return;
 		} catch (error) {
+			console.log(error);
 			return toast('Something went wrong', 'error')
 		} finally {
 			setLoading(false);
@@ -699,6 +753,7 @@ const SalesInvoice = ({ mode }) => {
 												<div className='flex flex-col gap-1'>
 													<MySelect2
 														model={Constants.ITEM}
+														value={ItemRows[index].itemId}
 														onType={(v) => {
 															if (v === ItemRows[index].itemId) return;
 															onItemChange(v, index, tax, ItemRows, setItemRows, setItems);
@@ -712,12 +767,11 @@ const SalesInvoice = ({ mode }) => {
 															// Get Purchase Invoice;
 															getPurchaseInvoice(v)
 														}}
-														value={ItemRows[index].itemId}
 													/>
 
 													<MyTagPicker
 														placeholder={"Select Purchase invoice..."}
-														data={settleInvoice}
+														data={settleInvoice.find((inv, _) => inv.itemId === ItemRows[index].itemId)?.sattleInv}
 														values={ItemRows[index].settleInvoice}
 														onChange={(selected) => {
 															const values = selected.map((tag) => tag.value);
