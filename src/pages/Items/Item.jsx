@@ -22,6 +22,7 @@ import BarCodeModal from '../../components/BarCodeModal';
 
 const DEBOUNCE_TIME = 300;
 const Item = ({ mode }) => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const dispatch = useDispatch();
 	const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
@@ -67,7 +68,7 @@ const Item = ({ mode }) => {
 			try {
 				setLoading(true);
 				const data = {
-					token: Cookies.get("token"),
+					token,
 					all: tableStatusData === "all" ? true : false,
 					searchText: searchText
 				}
@@ -143,7 +144,7 @@ const Item = ({ mode }) => {
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ ids: selected })
+				body: JSON.stringify({ ids: selected, token })
 			});
 			const res = await req.json();
 

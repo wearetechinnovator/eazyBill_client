@@ -22,6 +22,7 @@ import ContextMenu from '../../components/ContextMenu';
 
 
 const Proforma = () => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
 	const [activePage, setActivePage] = useState(1);
@@ -171,7 +172,7 @@ const Proforma = () => {
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ ids: selected })
+				body: JSON.stringify({ ids: selected, token })
 			});
 			const res = await req.json();
 

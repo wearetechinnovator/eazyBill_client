@@ -20,6 +20,7 @@ import Loading from '../../components/Loading';
 
 
 const SalesReturn = ({ mode }) => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { id } = useParams()
 	const [loading, setLoading] = useState(false);
@@ -41,11 +42,13 @@ const SalesReturn = ({ mode }) => {
 	const [additionalRows, setAdditionalRow] = useState([additionalRowSet]); //{ additionalRowsItem: 1 }
 	const [formData, setFormData] = useState({
 		party: '', salesReturnNumber: '', returnDate: new Date().toISOString().split('T')[0],
-		items: ItemRows, additionalCharge: additionalRows, note: '', terms: ``, discountType: '',
-		discountAmount: '', discountPercentage: '', finalAmount: '', paymentStatus: false,
-		paymentType: Constants.CASH, paymentAccount: '', paymentAmount: '', autoRoundOff: false,
-		roundOffType: '0', roundOffAmount: ''
+		salesInvoice: '', items: ItemRows, additionalCharge: additionalRows, note: '', terms: ``,
+		discountType: '', discountAmount: '', discountPercentage: '', finalAmount: '',
+		paymentStatus: false, paymentType: Constants.CASH, paymentAccount: '', paymentAmount: '',
+		autoRoundOff: false, roundOffType: '0', roundOffAmount: ''
 	})
+	// Sales Invoices for Credit Note;
+	const [salesInvoice, setSalesInvoice] = useState([]);
 
 	const [perPrice, setPerPrice] = useState(null);
 	const [perTax, setPerTax] = useState(null);
@@ -57,13 +60,9 @@ const SalesReturn = ({ mode }) => {
 
 	// Store all items without filter
 	const [items, setItems] = useState([]);
-	// Store units
 	const [unit, setUnit] = useState([]);
-	// Store taxes
 	const [tax, setTax] = useState([]);
-	// Store party
 	const [party, setParty] = useState([]);
-	// Account
 	const [account, setAccount] = useState([])
 
 
@@ -82,14 +81,13 @@ const SalesReturn = ({ mode }) => {
 	// Get data for update mode
 	const get = async () => {
 		const url = `${process.env.REACT_APP_API_URL}/salesreturn/get`;
-		const cookie = Cookies.get("token");
 
 		const req = await fetch(url, {
 			method: "POST",
 			headers: {
 				"Content-Type": 'application/json'
 			},
-			body: JSON.stringify({ token: cookie, id: id })
+			body: JSON.stringify({ token, id: id })
 		})
 		const res = await req.json();
 		setFormData({
@@ -110,6 +108,36 @@ const SalesReturn = ({ mode }) => {
 			get();
 		}
 	}, [id])
+
+
+	// Get Sales invoice;
+	useEffect(() => {
+		(async () => {
+			try {
+				if (formData.party) {
+					const url = `${process.env.REACT_APP_API_URL}/creditnote/get-sales-invoice`;
+					const req = await fetch(url, {
+						method: "POST",
+						headers: {
+							"Content-Type": 'application/json'
+						},
+						body: JSON.stringify({ token, partyId: formData.party })
+					})
+					const res = await req.json();
+
+					if (req.status !== 200) {
+						setSalesInvoice([]);
+						return toast(res.err, 'error');
+					}
+
+					setSalesInvoice([...res.data]);
+				}
+			} catch (error) {
+				console.log(error)
+				return toast("Sales inovoice not get", 'error')
+			}
+		})()
+	}, [formData.party])
 
 
 	useEffect(() => {
@@ -388,6 +416,37 @@ const SalesReturn = ({ mode }) => {
 									value={formData.party?._id}
 								/>
 							</div>
+							<div className='flex flex-col gap-2 w-full lg:max-w-[300px]'>
+								<p className='text-xs'>Select Bill <span className='text-red-600'>*</span></p>
+								<SelectPicker
+									data={salesInvoice?.map((inv, i) => {
+										return {
+											label: `${inv.salesInvoiceNumber} | ${new Date(inv.invoiceDate).toLocaleDateString()}`,
+											value: inv._id.toString()
+										}
+									})}
+
+									onChange={(v) => {
+										if (!v) {
+											setItemRows([itemRowSet]);
+											setAdditionalRow([additionalRowSet]);
+											setFormData({ ...formData, salesInvoice: '' });
+											return;
+										}
+
+										const selectedInvoice = salesInvoice.find((inv, i) => inv._id === v);
+
+										setAdditionalRow([...selectedInvoice?.additionalCharge])
+										setItemRows([...selectedInvoice?.items]);
+										setFormData({
+											...formData, salesInvoice: v,
+											items: selectedInvoice?.items
+										});
+									}}
+
+									value={formData.salesInvoice}
+								/>
+							</div>
 							<div className='flex flex-col gap-2 w-full lg:w-1/3'>
 								<p className='text-xs'>Sales Return Number <span className='required__text'>*</span></p>
 								<input type="text"
@@ -577,14 +636,14 @@ const SalesReturn = ({ mode }) => {
 									))}
 								</tbody>
 								<tfoot>
-									<tr>
+									{/*<tr>
 										<td colSpan={9}>
 											<Button color='blue' className='float-right w-full font-bold' onClick={() => addItem(1, itemRowSet, setItemRows, setFormData, additionalRowSet, setAdditionalRow)}>
 												<Icons.ADD_LIST className='text-lg mr-1' />
 												Add Item
 											</Button>
 										</td>
-									</tr>
+									</tr>*/}
 									<tr>
 										<td colSpan={5} align='right'>
 											<p className='py-2 font-bold'>Sub-Total</p>

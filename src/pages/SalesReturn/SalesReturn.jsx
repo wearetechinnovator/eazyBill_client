@@ -22,6 +22,7 @@ import ContextMenu from '../../components/ContextMenu';
 
 
 const SalesReturn = () => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
 	const [activePage, setActivePage] = useState(1);
@@ -57,7 +58,7 @@ const SalesReturn = () => {
 		setLoading(true);
 		try {
 			let data = {
-				token: Cookies.get("token"),
+				token,
 				all: tableStatusData === "all" ? true : false
 			}
 			if (applyFilter) {
@@ -174,7 +175,7 @@ const SalesReturn = () => {
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ ids: selected })
+				body: JSON.stringify({ ids: selected, token })
 			});
 			const res = await req.json();
 

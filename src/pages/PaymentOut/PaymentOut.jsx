@@ -33,6 +33,7 @@ import ContextMenu from '../../components/ContextMenu';
 // ---- PAYMENT OUT ----
 document.title = "Payment out"
 const PaymentOut = () => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
 	const [activePage, setActivePage] = useState(1);
@@ -70,7 +71,7 @@ const PaymentOut = () => {
 		const getData = async () => {
 			setLoading(true);
 			let data = {
-				token: Cookies.get("token"),
+				token,
 				all: tableStatusData === "all" ? true : false
 			}
 			if (applyFilter) {
@@ -185,7 +186,7 @@ const PaymentOut = () => {
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ ids: selected })
+				body: JSON.stringify({ ids: selected, token })
 			});
 			const res = await req.json();
 

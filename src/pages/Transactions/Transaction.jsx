@@ -171,7 +171,7 @@ const Transaction = () => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ ids: selected })
+                body: JSON.stringify({ ids: selected, token })
             });
             const res = await req.json();
 
@@ -222,11 +222,11 @@ const Transaction = () => {
                 <SideNav />
                 <Tooltip id='transactionTooltip' />
                 <ContextMenu
-					print={() => exportTable('print')}
-					copy={() => exportTable('copy')}
-					pdf={() => exportTable('pdf')}
-					excel={() => exportTable('excel')}
-				/>
+                    print={() => exportTable('print')}
+                    copy={() => exportTable('copy')}
+                    pdf={() => exportTable('pdf')}
+                    excel={() => exportTable('excel')}
+                />
                 <div className='content__body'>
                     {/* top section */}
                     <div className={"add_new_compnent"}>
@@ -262,7 +262,7 @@ const Transaction = () => {
                                 <button
                                     onClick={() => navigate("/admin/other-transaction/add")}
                                     className='bg-[#003E32] text-white '>
-                                    <Icons.ADD className='text-white' size={15}/>
+                                    <Icons.ADD className='text-white' size={15} />
                                     Add New
                                 </button>
                                 {

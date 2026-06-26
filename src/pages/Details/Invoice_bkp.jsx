@@ -205,14 +205,11 @@ const Invoice = () => {
             const taxableValue = qty * price;
             const taxAmount = (taxableValue * taxRate) / 100;
 
-            // ✅ Composite key — same HSN but different tax = alag row
-            const hsnKey = `${hsn}_${taxRate}`;
-
-            if (hsnMap[hsnKey]) {
-                hsnMap[hsnKey].taxableValue += taxableValue;
-                hsnMap[hsnKey].taxAmount += taxAmount;
+            if (hsnMap[hsn]) {
+                hsnMap[hsn].taxableValue += taxableValue;
+                hsnMap[hsn].taxAmount += taxAmount;
             } else {
-                hsnMap[hsnKey] = {
+                hsnMap[hsn] = {
                     hsn,
                     rate: taxRate,
                     taxableValue,
@@ -1137,12 +1134,22 @@ const Invoice = () => {
                                                     </thead>
                                                     <tbody>
                                                         {/* IGST - Inter-state */}
-                                                        {hsnData && companyDetails?.state !== billData?.party.state && (
-                                                            hsnData.map((data, i) => {
+                                                        {hsnData && companyDetails?.state !== billData?.party.state && (() => {
+                                                            const rows = [];
+                                                            const seen = {};
+
+                                                            for (let i = 0; i < hsnData.length; i++) {
+                                                                const data = hsnData[i];
+
+                                                                // Skip if we've already seen this HSN
+                                                                if (seen[data.hsn]) continue;
+
+                                                                seen[data.hsn] = true;
+
                                                                 const taxableValue = data.taxableValue;
                                                                 const igstAmount = (taxableValue * data.rate / 100).toFixed(2);
 
-                                                                return (
+                                                                rows.push(
                                                                     <tr key={`${i}-igst`}>
                                                                         <td align='center'>{data.hsn}</td>
                                                                         <td align='center'>{taxableValue.toFixed(2)}</td>
@@ -1151,12 +1158,14 @@ const Invoice = () => {
                                                                         <td align='center'>{igstAmount}</td>
                                                                     </tr>
                                                                 );
-                                                            })
-                                                        )}
+                                                            }
+
+                                                            return rows;
+                                                        })()}
 
                                                         {/* SGST/CGST - Intra-state */}
                                                         {hsnData && companyDetails?.state === billData?.party.state && (
-                                                            hsnData.map((data, i) => {
+                                                            [...new Map(hsnData.map(item => [item.hsn, item])).values()].map((data, i) => {
                                                                 const taxableValue = data.taxableValue;
                                                                 const halfRate = data.rate / 2;
                                                                 const sgstAmount = (taxableValue * halfRate / 100).toFixed(2);

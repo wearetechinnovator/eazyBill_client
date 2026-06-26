@@ -130,7 +130,7 @@ const Enquiry = () => {
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ ids: selected })
+				body: JSON.stringify({ ids: selected, token })
 			});
 			const res = await req.json();
 

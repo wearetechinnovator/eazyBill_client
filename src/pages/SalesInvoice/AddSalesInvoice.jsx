@@ -110,23 +110,25 @@ const SalesInvoice = ({ mode }) => {
 				return toast(res.err, 'error');
 			}
 
-			const sattleInv = res.map((inv, i) => {
-				const getItemObj = inv.items.find((item, _) => item.itemId === itemId);
-				const expiryDate = getItemObj?.expireDate?.split("T")[0];
-				const date = new Date(expiryDate);
+			const sattleInv = res.map((inv) => {
+				const matchedItems = inv.items.filter((item) => item.itemId === itemId);
 
-				const qty = `${getItemObj.remainingQun} ${getItemObj.selectedUnit}`;
+				// Sab units ek saath — "3 PKT  3 PCS"
+				const qtyLabel = matchedItems.map(item => `${item.remainingQun} ${item.selectedUnit}`).join("  ");
+
+				// Pehle item se expiry lo
+				const firstItem = matchedItems[0];
+				const expiryDate = firstItem?.expireDate?.split("T")[0];
+				const date = new Date(expiryDate);
 				const year = expiryDate ? date.getFullYear() : '';
-				const monthName = expiryDate ? date.toLocaleString("en-US", {
-					month: "short"
-				}) : '';
+				const monthName = expiryDate ? date.toLocaleString("en-US", { month: "short" }) : '';
 
 				return {
 					"label": `${inv.purchaseInvoiceNumber}`,
-					"subLabel": [`Exp: ${monthName} ${year}`, `Qty: ${qty}`],
+					"subLabel": [`Exp: ${monthName} ${year}`, `Qty: ${qtyLabel}`],
 					"value": inv._id
-				}
-			})
+				};
+			});
 
 			// Store as label and value pair.
 			setSettleInvoice(prev => [...prev, { itemId, sattleInv }]);

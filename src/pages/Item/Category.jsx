@@ -19,6 +19,7 @@ import ContextMenu from '../../components/ContextMenu';
 
 const DEBOUNCE_TIME = 300;
 const Category = () => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
 	const [activePage, setActivePage] = useState(1);
@@ -47,7 +48,7 @@ const Category = () => {
 		const getCategory = async () => {
 			try {
 				const data = {
-					token: Cookies.get("token"),
+					token,
 					all: tableStatusData === "all" ? true : false,
 					searchText: searchText
 				}
@@ -142,7 +143,7 @@ const Category = () => {
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ ids: selected })
+				body: JSON.stringify({ ids: selected, token })
 			});
 			const res = await req.json();
 

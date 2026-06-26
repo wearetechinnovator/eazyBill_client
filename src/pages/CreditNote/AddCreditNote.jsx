@@ -20,6 +20,7 @@ import Loading from '../../components/Loading';
 
 
 const CreditNote = ({ mode }) => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { id } = useParams();
 	const [loading, setLoading] = useState(false);
@@ -83,14 +84,13 @@ const CreditNote = ({ mode }) => {
 	// Get data for update mode
 	const get = async () => {
 		const url = `${process.env.REACT_APP_API_URL}/creditnote/get`;
-		const cookie = Cookies.get("token");
 
 		const req = await fetch(url, {
 			method: "POST",
 			headers: {
 				"Content-Type": 'application/json'
 			},
-			body: JSON.stringify({ token: cookie, id: id })
+			body: JSON.stringify({ token, id: id })
 		})
 		const res = await req.json();
 
@@ -120,13 +120,12 @@ const CreditNote = ({ mode }) => {
 			try {
 				if (formData.party) {
 					const url = `${process.env.REACT_APP_API_URL}/creditnote/get-sales-invoice`;
-					const cookie = Cookies.get("token");
 					const req = await fetch(url, {
 						method: "POST",
 						headers: {
 							"Content-Type": 'application/json'
 						},
-						body: JSON.stringify({ token: cookie, partyId: formData.party })
+						body: JSON.stringify({ token, partyId: formData.party })
 					})
 					const res = await req.json();
 
@@ -640,14 +639,14 @@ const CreditNote = ({ mode }) => {
 									))}
 								</tbody>
 								<tfoot>
-									<tr>
+									{/* <tr>
 										<td colSpan={9}>
 											<Button color='blue' className='float-right w-full font-bold' onClick={() => addItem(1, itemRowSet, setItemRows, setFormData, additionalRowSet, setAdditionalRow)}>
 												<Icons.ADD_LIST className='text-lg mr-1' />
 												Add Item
 											</Button>
 										</td>
-									</tr>
+									</tr> */}
 									<tr>
 										<td colSpan={5} align='right'>
 											<p className='py-2 font-bold'>Sub-Total</p>

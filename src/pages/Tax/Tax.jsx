@@ -25,6 +25,7 @@ import { Icons } from '../../helper/icons';
 
 const DEBOUNCE_TIME = 300;
 const Tax = ({ mode }) => {
+	
 	const toast = useMyToaster();
 	const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
 	const [activePage, setActivePage] = useState(1);

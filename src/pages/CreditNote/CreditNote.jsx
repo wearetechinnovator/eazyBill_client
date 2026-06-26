@@ -21,6 +21,7 @@ import ContextMenu from '../../components/ContextMenu';
 
 
 const CreditNote = () => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
 	const [activePage, setActivePage] = useState(1);
@@ -56,7 +57,7 @@ const CreditNote = () => {
 		setLoading(true);
 		try {
 			let data = {
-				token: Cookies.get("token"),
+				token,
 				all: tableStatusData === "all" ? true : false
 			}
 			if (applyFilter) {
@@ -170,7 +171,7 @@ const CreditNote = () => {
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ ids: selected })
+				body: JSON.stringify({ ids: selected, token })
 			});
 			const res = await req.json();
 
@@ -261,7 +262,7 @@ const CreditNote = () => {
 								<button
 									onClick={() => navigate("/admin/credit-note/add")}
 									className='bg-[#003E32] text-white '>
-									<Icons.ADD className='text-white' size={15}/>
+									<Icons.ADD className='text-white' size={15} />
 									Add New
 								</button>
 								{

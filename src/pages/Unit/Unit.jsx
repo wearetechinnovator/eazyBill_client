@@ -25,6 +25,7 @@ import { Icons } from '../../helper/icons';
 
 const DEBOUNCE_TIME = 300;
 const Unit = () => {
+    const token = Cookies.get("token");
     const toast = useMyToaster();
     const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
     const [activePage, setActivePage] = useState(1);
@@ -141,7 +142,7 @@ const Unit = () => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ ids: selected })
+                body: JSON.stringify({ ids: selected, token })
             });
             const res = await req.json();
 
@@ -257,7 +258,7 @@ const Unit = () => {
                                 <button
                                     onClick={() => navigate("/admin/unit/add")}
                                     className='bg-[#003E32] text-white '>
-                                    <Icons.ADD className='text-white' size={15}/>
+                                    <Icons.ADD className='text-white' size={15} />
                                     Add New
                                 </button>
                                 {

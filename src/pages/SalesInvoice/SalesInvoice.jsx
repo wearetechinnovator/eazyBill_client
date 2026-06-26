@@ -22,6 +22,7 @@ import TableNoData from '../../components/TableNoData';
 
 
 const SalesInvoice = () => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { copyTable, downloadExcel, printTable, exportPdf } = useExportTable();
 	const [activePage, setActivePage] = useState(1);
@@ -78,7 +79,7 @@ const SalesInvoice = () => {
 		try {
 			setLoading(true);
 			let data = {
-				token: Cookies.get("token"),
+				token,
 				all: tableStatusData === "all" ? true : false
 			}
 			if (applyFilter) {
@@ -233,7 +234,7 @@ const SalesInvoice = () => {
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ ids: selected })
+				body: JSON.stringify({ ids: selected, token })
 			});
 			const res = await req.json();
 
