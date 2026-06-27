@@ -89,10 +89,49 @@ const SalesInvoice = ({ mode }) => {
 	} = useFormHandle();
 
 
+	// remainingQun (PCS) → selectedUnit display
+	function displayQty(remainingQtyBase, selectedUnit, baseUnit, unitList) {
+
+		const index = unitList.findIndex(u => u.unit === selectedUnit);
+
+		if (index === -1) {
+			return `${remainingQtyBase} ${baseUnit}`;
+		}
+
+		// selectedUnit ka factor nikalo
+		let factor = 1;
+
+		for (let i = index + 1; i < unitList.length; i++) {
+			factor *= Number(unitList[i].conversion);
+		}
+
+		let remaining = remainingQtyBase;
+
+		const result = [];
+
+		// selectedUnit se neeche ke sab units me break karo
+		for (let i = index; i < unitList.length; i++) {
+
+			let currentFactor = 1;
+
+			for (let j = i + 1; j < unitList.length; j++) {
+				currentFactor *= Number(unitList[j].conversion);
+			}
+
+			const qty = Math.floor(remaining / currentFactor);
+
+			if (qty > 0) {
+				result.push(`${qty} ${unitList[i].unit}`);
+				remaining %= currentFactor;
+			}
+		}
+
+		return result.join(' ');
+	}
 
 
-	// Get Purchase Bill by Item id;
-	// update field er kah ei API controller file a lekha ache;
+	// Get Purchase Bill by Item id and set Value Label for dropdown;
+	// update field er kaj ei API controller file a lekha ache;
 	const getPurchaseInvoice = async (itemId, update = false) => {
 		if (!itemId) return;
 
@@ -110,13 +149,44 @@ const SalesInvoice = ({ mode }) => {
 				return toast(res.err, 'error');
 			}
 
+			// const sattleInv = res.map((inv) => {
+			// 	const matchedItems = inv.items.filter((item) => item.itemId === itemId);
+
+			// 	// Sab units ek saath — "3 PKT  3 PCS"
+			// 	const qtyLabel = matchedItems.map(item => `${item.remainingQun} ${item.selectedUnit}`).join("  ");
+
+			// 	// Pehle item se expiry lo
+			// 	const firstItem = matchedItems[0];
+			// 	const expiryDate = firstItem?.expireDate?.split("T")[0];
+			// 	const date = new Date(expiryDate);
+			// 	const year = expiryDate ? date.getFullYear() : '';
+			// 	const monthName = expiryDate ? date.toLocaleString("en-US", { month: "short" }) : '';
+
+			// 	return {
+			// 		"label": `${inv.purchaseInvoiceNumber}`,
+			// 		"subLabel": [`Exp: ${monthName} ${year}`, `Qty: ${qtyLabel}`],
+			// 		"value": inv._id
+			// 	};
+			// });
+
+
+			// Store as label and value pair.
+
 			const sattleInv = res.map((inv) => {
 				const matchedItems = inv.items.filter((item) => item.itemId === itemId);
 
-				// Sab units ek saath — "3 PKT  3 PCS"
-				const qtyLabel = matchedItems.map(item => `${item.remainingQun} ${item.selectedUnit}`).join("  ");
+				// Merge karo same itemId rows
+				const totalBase = matchedItems.reduce((sum, item) => sum + parseInt(item.remainingQun || 0), 0);
 
-				// Pehle item se expiry lo
+				// Item master se unitList (conversion wala)
+				const itemMaster = items.find(i => i._id === itemId);
+				const unitList = itemMaster?.unit ?? [];
+				const topUnit = unitList[0]?.unit ?? matchedItems[0]?.baseUnit;
+
+				const qtyLabel = unitList.length > 0
+					? displayQty(totalBase, topUnit, matchedItems[0]?.baseUnit, unitList)
+					: `${totalBase} ${matchedItems[0]?.baseUnit}`;
+
 				const firstItem = matchedItems[0];
 				const expiryDate = firstItem?.expireDate?.split("T")[0];
 				const date = new Date(expiryDate);
@@ -130,7 +200,6 @@ const SalesInvoice = ({ mode }) => {
 				};
 			});
 
-			// Store as label and value pair.
 			setSettleInvoice(prev => [...prev, { itemId, sattleInv }]);
 
 			SetAllSettleInvoice(res);
@@ -561,6 +630,8 @@ const SalesInvoice = ({ mode }) => {
 			row.amount = calculatePerAmount(index);
 		});
 		setItemRows([...ItemRows]);
+
+
 
 
 		try {

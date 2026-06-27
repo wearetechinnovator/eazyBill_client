@@ -35,10 +35,10 @@ const PurchaseInvoice = ({ mode }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const itemRowSet = {
-		rowItem: 1, itemName: '', description: '', hsn: '', qun: '1', remainingQun: 1, itemId: '',
-		unit: [], selectedUnit: "", price: '', discountPerAmount: '', discountPerPercentage: '',
+		rowItem: 1, itemName: '', description: '', hsn: '', qun: '1', remainingQun: 1, baseUnit:'',
+		itemId: '', unit: [], selectedUnit: "", price: '', discountPerAmount: '', discountPerPercentage: '',
 		tax: '', taxAmount: '', amount: '', perDiscountType: "", //for checking purpose only
-		expireDate: '', id: '', 
+		expireDate: '', id: '',
 	}
 	const additionalRowSet = {
 		additionalRowsItem: 1, particular: '', amount: ''
@@ -131,6 +131,30 @@ const PurchaseInvoice = ({ mode }) => {
 			get();
 		}
 	}, [id])
+
+	// Convert to base unit and store remining Qty;
+	const convertUnitToBase = (itemId, qun, selectedUnit) => {
+		const item = items.find(i => i._id.toString() === itemId.toString());
+		if (!item) return null;
+
+		const units = item.unit;
+
+		const index = units.findIndex(u => u.unit === selectedUnit);
+		if (index === -1) return null;
+
+		let factor = 1;
+
+		for (let i = index + 1; i < units.length; i++) {
+			factor *= Number(units[i].conversion);
+		}
+
+		const baseQty = qun * factor;
+
+		return {
+			quantity: baseQty,
+			unit: units[units.length - 1].unit
+		};
+	}
 
 
 	useEffect(() => {
@@ -277,10 +301,19 @@ const PurchaseInvoice = ({ mode }) => {
 
 		// Add Per Item Tax and Amound before save
 		ItemRows.forEach((row, index) => {
+			const baseUnit = convertUnitToBase(row.itemId, row.qun, row.selectedUnit);
+
 			row.taxAmount = calculatePerTaxAmount(index, ItemRows);
 			row.amount = calculatePerAmount(index, ItemRows);
+
+			if(baseUnit){
+				row.remainingQun = baseUnit.quantity;
+				row.baseUnit = baseUnit.unit;
+			}
+
 		});
 		setItemRows([...ItemRows]);
+
 
 		try {
 			setLoading(true);

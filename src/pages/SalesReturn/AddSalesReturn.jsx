@@ -534,10 +534,10 @@ const SalesReturn = ({ mode }) => {
 												<select className='input-style'
 													onChange={(e) => {
 														let item = [...ItemRows];
-														item[index].unit = e.target.value;
+														item[index].selectedUnit = e.target.value;
 														setItemRows(item);
 													}}
-													value={ItemRows[index].unit}
+													value={ItemRows[index].selectedUnit}
 												>
 													{
 														ItemRows[index].unit.map((u, _) => {
