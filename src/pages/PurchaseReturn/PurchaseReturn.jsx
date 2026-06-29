@@ -253,13 +253,6 @@ const PurchaseReturn = () => {
 								</select>
 							</div>
 							<div className='flex items-center gap-2'>
-								{/* <div className='flex w-full flex-col lg:w-[300px]'>
-									<input type='text'
-										placeholder='Search...'
-										onChange={searchTable}
-										className='p-[6px]'
-									/>
-								</div> */}
 								<button onClick={() => {
 									setFilterToggle(!filterToggle)
 								}}

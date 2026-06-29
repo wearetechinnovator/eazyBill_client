@@ -29,6 +29,7 @@ const ItemAdd = ({ mode }) => {
 }
 
 const AddItemComponent = ({ mode, save, getRes }) => {
+	const token = Cookies.get("token");
 	const toast = useMyToaster();
 	const { getApiData } = useApi()
 	const [form, setForm] = useState({
@@ -46,21 +47,20 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 	const [unitRow, setUnitRow] = useState([unitRowSet]);
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
+	const [isUnitEdit, setIsUnitEdit] = useState(true);
 
 
-
+	// Get Item Data
 	useEffect(() => {
 		if (mode) {
 			const get = async () => {
 				const url = process.env.REACT_APP_API_URL + "/item/get";
-				const cookie = Cookies.get("token");
-
 				const req = await fetch(url, {
 					method: "POST",
 					headers: {
 						"Content-Type": 'application/json'
 					},
-					body: JSON.stringify({ token: cookie, id: id })
+					body: JSON.stringify({ token, id: id })
 				})
 				const res = await req.json();
 				const data = res.data;
@@ -75,6 +75,31 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 
 			get();
 		}
+	}, [mode])
+
+	// Check unit edit or not
+	useEffect(() => {
+		if (!id) return;
+		(async () => {
+			try {
+				const URL = process.env.REACT_APP_API_URL + "/item/is-unit-edit";
+				const req = await fetch(URL, {
+					method: "POST",
+					headers: {
+						"Content-Type": 'application/json'
+					},
+					body: JSON.stringify({ token, itemId: id })
+				})
+				const res = await req.json();
+				if (req.status !== 200) {
+					return toast(res.err, 'error');
+				}
+
+				setIsUnitEdit(res.edit);
+			} catch (err) {
+				return toast("Unit Not check", "error")
+			}
+		})()
 	}, [mode])
 
 	// Get Data
@@ -101,7 +126,6 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 
 	}, [])
 
-
 	const saveData = async (e) => {
 		if (form.title === "") {
 			return toast("Item name can't be blank", "error")
@@ -112,17 +136,19 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 
 		try {
 			setLoading(true);
-			const url = process.env.REACT_APP_API_URL + "/item/add";
-			const token = Cookies.get("token");
-			const req = await fetch(url, {
+			const data = {
+				...form,token,
+				...(mode && { update: true, id }),
+				...(isUnitEdit && { unit: unitRow })
+			};
+
+			const URL = process.env.REACT_APP_API_URL + "/item/add";
+			const req = await fetch(URL, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify(
-					!mode ? { ...form, token, unit: unitRow }
-						: { ...form, token, unit: unitRow, update: true, id: id }
-				)
+				body: JSON.stringify(data)
 			})
 			const res = await req.json();
 			if (req.status !== 200 || res.err) {
@@ -153,7 +179,6 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 
 	}
 
-
 	const clearData = () => {
 		setForm({
 			title: '', type: Constants.GOODS, salePrice: '', category: '', details: '', hsn: '', tax: '',
@@ -177,19 +202,24 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 
 					<div className='w-full flex-col md:flex-row flex items-center gap-2 mt-3'>
 						<div className='w-full'>
-							<p className='mb-1'>Sale Price <span className='required__text'>*</span></p>
+							<p className='mb-1'>Sale Price</p>
 							<input type="text"
 								onChange={(e) => setForm({ ...form, salePrice: checkNumber(e.target.value) })}
 								value={form.salePrice} />
 						</div>
 						<div className='w-full mt-[20px]'>
-							<select
+							<SelectPicker
+								className='w-full'
+								searchable={false}
+								data={[
+									{ label: "With Tax", value: '1' },
+									{ label: "Without Tax", value: '0' }
+								]}
 								value={form.saleTaxType}
-								onChange={(e) => setForm({ ...form, saleTaxType: e.target.value })}
-							>
-								<option value={"1"}>With Tax</option>
-								<option value={"0"}>Without Tax</option>
-							</select>
+								onChange={(v) => {
+									setForm({ ...form, saleTaxType: v })
+								}}
+							/>
 						</div>
 					</div>
 
@@ -207,18 +237,24 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 					<div className='w-full flex-col md:flex-row flex items-center gap-3'>
 						<div className='w-full'>
 							<p className='mb-1 ml-1'>Item Type</p>
-							<select onChange={(e) => setForm({ ...form, type: e.target.value })} value={form.type}>
-								<option value={""}>Select</option>
-								<option value={Constants.GOODS}>Goods</option>
-								<option value={Constants.SERVICE}>Service</option>
-							</select>
+							<SelectPicker
+								className='w-full'
+								searchable={false}
+								data={[
+									{ label: "Goods", value: Constants.GOODS },
+									{ label: "Service", value: Constants.SERVICE }
+								]}
+								value={form.type}
+								onChange={(v) => {
+									setForm({ ...form, type: v })
+								}}
+							/>
 						</div>
 						<div className='w-full'>
 							<p className='ml-1 mb-1'>Select Category</p>
 							<MySelect2
 								model={"category"}
 								onType={(v) => {
-									console.log(v)
 									setForm({ ...form, category: v })
 								}}
 								value={form.category}
@@ -228,18 +264,24 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 
 					<div className='w-full flex-col md:flex-row flex items-center gap-3'>
 						<div className='w-full'>
-							<p className='mt-2 mb-1'>Purchase Price <span className='required__text'>*</span></p>
+							<p className='mt-2 mb-1'>Purchase Price</p>
 							<input type="text"
 								onChange={(e) => setForm({ ...form, purchasePrice: checkNumber(e.target.value) })}
 								value={form.purchasePrice} />
 						</div>
 						<div className='w-full mt-[28px]'>
-							<select
+							<SelectPicker
+								className='w-full'
+								searchable={false}
+								data={[
+									{ label: "With Tax", value: '1' },
+									{ label: "Without Tax", value: '0' }
+								]}
 								value={form.purchaseTaxType}
-								onChange={(e) => setForm({ ...form, purchaseTaxType: e.target.value })}>
-								<option value={"1"}>With Tax</option>
-								<option value={"0"}>Without Tax</option>
-							</select>
+								onChange={(v) => {
+									setForm({ ...form, purchaseTaxType: v })
+								}}
+							/>
 						</div>
 					</div>
 
@@ -276,7 +318,8 @@ const AddItemComponent = ({ mode, save, getRes }) => {
 
 			{/* ============================= [UNIT TABLE START =========================] */}
 
-			<div className='w-full overflow-auto mt-4'>
+			<div className='w-full overflow-auto mt-4 relative'>
+				{!isUnitEdit && <div className='absolute w-full h-full bg-[#ffffff77] rounded cursor-not-allowed'></div>}
 				<table className='w-full border'>
 					<thead className='bg-gray-200'>
 						<tr>

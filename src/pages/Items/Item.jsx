@@ -229,14 +229,20 @@ const Item = ({ mode }) => {
 										if (selected.length === 0 || tableStatusData !== 'active') return;
 										setOpenConfirm(true);
 									}}
-									className={`${selected.length > 0 ? 'bg-red-400 text-white' : 'bg-gray-100'} border`}>
-									<Icons.DELETE className='text-lg' />
+									className={`${selected.length > 0 ? 'bg-red-400 text-white' : 'bg-gray-50'} border`}>
+									<Icons.DELETE size={15} />
 									Delete
+								</button>
+								<button
+									onClick={() => navigate("/admin/item/bulk-import")}
+									className={`bg-gray-50 border`}>
+									<Icons.ADD_LIST className='text-lg' />
+									Bulk Import
 								</button>
 								<button
 									onClick={() => navigate("/admin/item/add")}
 									className='bg-[#003E32] text-white '>
-									<Icons.ADD className='text-white' size={15}/>
+									<Icons.ADD className='text-white' size={15} />
 									Add New
 								</button>
 								{

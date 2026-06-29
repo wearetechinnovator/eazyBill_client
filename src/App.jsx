@@ -24,6 +24,7 @@ const CategoryAdd = React.lazy(() => import("./pages/Item/CategoryAdd"));
 const Category = React.lazy(() => import("./pages/Item/Category"));
 const ItemAdd = React.lazy(() => import("./pages/Items/ItemAdd"));
 const Item = React.lazy(() => import("./pages/Items/Item"));
+const ItemBulkIport = React.lazy(() => import("./pages/Items/ItemBulkIport"));
 const RoleAdd = React.lazy(() => import("./pages/Role/RoleAdd"));
 const Role = React.lazy(() => import("./pages/Role/Role"));
 const AddCompany = React.lazy(() => import("./pages/Company/AddCompany"));
@@ -221,6 +222,7 @@ const App = () => {
         <Route path="/admin/item/edit/:id" element={<ProtectRoute><ItemAdd mode="edit" /></ProtectRoute>} />
         <Route path="/admin/item" element={<ProtectRoute><Item /></ProtectRoute>} />
         <Route path="/admin/item/details/:id" element={<ProtectRoute><ItemDetails /></ProtectRoute>} />
+        <Route path="/admin/item/bulk-import" element={<ProtectRoute><ItemBulkIport /></ProtectRoute>} />
 
 
         <Route path="/admin/role/add" element={<ProtectRoute><RoleAdd /></ProtectRoute>} />
